@@ -1,8 +1,8 @@
-package ext
+package io.karn.instagram.ext
 
-import common.Errors
-import core.SyntheticResponse
-import endpoints.Authentication
+import io.karn.instagram.common.Errors
+import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.endpoints.Authentication
 import io.reactivex.Single
 
 fun Authentication.authenticateSingle(username: String, password: String, token: String? = null): Single<SyntheticResponse.AuthenticationResult> {

@@ -1,11 +1,11 @@
-package endpoints
+package io.karn.instagram.endpoints
 
-import Instagram
 import android.text.TextUtils
-import common.Errors
-import core.Crypto
-import core.Endpoints
-import core.SyntheticResponse
+import io.karn.instagram.Instagram
+import io.karn.instagram.common.Errors
+import io.karn.instagram.core.Crypto
+import io.karn.instagram.core.Endpoints
+import io.karn.instagram.core.SyntheticResponse
 import khttp.get
 import khttp.post
 import khttp.responses.Response

@@ -1,7 +1,7 @@
-package ext
+package io.karn.instagram.ext
 
-import core.SyntheticResponse
-import endpoints.Search
+import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.endpoints.Search
 import io.reactivex.Single
 
 fun Search.seachSingle(query: String): Single<SyntheticResponse.ProfileSearchResult> {

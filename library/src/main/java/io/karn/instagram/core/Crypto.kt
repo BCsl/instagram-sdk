@@ -1,6 +1,6 @@
-package core
+package io.karn.instagram.core
 
-import Instagram
+import io.karn.instagram.Instagram
 import khttp.structures.cookie.Cookie
 import khttp.structures.cookie.CookieJar
 import org.json.JSONObject

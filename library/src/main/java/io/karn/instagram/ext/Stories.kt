@@ -1,7 +1,7 @@
-package ext
+package io.karn.instagram.ext
 
-import core.SyntheticResponse
-import endpoints.Stories
+import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.endpoints.Stories
 import io.reactivex.Single
 
 fun Stories.getStoriesSingle(primaryKey: String): Single<SyntheticResponse.StoryReelResult> {

@@ -1,9 +1,11 @@
-import core.Configuration
-import core.Session
-import endpoints.Account
-import endpoints.Authentication
-import endpoints.Search
-import endpoints.Stories
+package io.karn.instagram
+
+import io.karn.instagram.core.Configuration
+import io.karn.instagram.core.Session
+import io.karn.instagram.endpoints.Account
+import io.karn.instagram.endpoints.Authentication
+import io.karn.instagram.endpoints.Search
+import io.karn.instagram.endpoints.Stories
 import khttp.KHttpConfig
 
 class Instagram private constructor(val configuration: Configuration) {

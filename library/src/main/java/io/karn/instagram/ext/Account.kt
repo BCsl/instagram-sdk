@@ -1,9 +1,9 @@
-package ext
+package io.karn.instagram.ext
 
-import Instagram
-import common.Errors
-import core.SyntheticResponse
-import endpoints.Account
+import io.karn.instagram.Instagram
+import io.karn.instagram.common.Errors
+import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.endpoints.Account
 import io.reactivex.Single
 import java.io.IOException
 

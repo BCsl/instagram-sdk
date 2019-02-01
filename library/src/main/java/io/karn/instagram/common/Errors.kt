@@ -1,4 +1,4 @@
-package common
+package io.karn.instagram.common
 
 object Errors {
     const val ERROR_UNKNOWN = "An unknown error occurred."

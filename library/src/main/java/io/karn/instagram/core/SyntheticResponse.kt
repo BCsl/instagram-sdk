@@ -1,4 +1,4 @@
-package core
+package io.karn.instagram.core
 
 import org.json.JSONArray
 import org.json.JSONObject

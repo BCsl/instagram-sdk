@@ -1,4 +1,4 @@
-package core
+package io.karn.instagram.core
 
 internal object Endpoints {
     private const val API_URL = "https://i.instagram.com/api/v1"

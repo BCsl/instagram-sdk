@@ -1,4 +1,4 @@
-package core
+package io.karn.instagram.core
 
 import khttp.structures.cookie.CookieJar
 

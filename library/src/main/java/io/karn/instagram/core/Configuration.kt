@@ -1,4 +1,4 @@
-package core
+package io.karn.instagram.core
 
 data class Configuration(
         val deviceUA: Boolean = false,
