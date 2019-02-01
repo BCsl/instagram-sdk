@@ -17,7 +17,7 @@ class Stories {
 
     fun getStories(primaryKey: String): SyntheticResponse.StoryReelResult = get(url = String.format(Endpoints.STORIES, primaryKey),
             headers = Crypto.HEADERS,
-            cookies = Instagram.getDefaultInstance().session.cookieJar)
+            cookies = Instagram.getInstance().session.cookieJar)
             .let {
                 return@let when (it.statusCode) {
                     200 -> {

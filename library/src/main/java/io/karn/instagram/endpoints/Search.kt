@@ -21,9 +21,9 @@ class Search {
      * @param query The search term that is being queried.
      * @return  An observable that emits a SyntheticResponse.ProfileSearchResult object.
      */
-    fun search(query: String): SyntheticResponse.ProfileSearchResult = get(url = String.format(Endpoints.SEARCH, "${Instagram.getDefaultInstance().session.pk}_${Instagram.getDefaultInstance().session.uuid}", query),
+    fun search(query: String): SyntheticResponse.ProfileSearchResult = get(url = String.format(Endpoints.SEARCH, "${Instagram.getInstance().session.pk}_${Instagram.getInstance().session.uuid}", query),
             headers = Crypto.HEADERS,
-            cookies = Instagram.getDefaultInstance().session.cookieJar)
+            cookies = Instagram.getInstance().session.cookieJar)
             .let {
                 return@let when (it.statusCode) {
                     200 -> {

@@ -12,15 +12,6 @@ import khttp.responses.Response
 import khttp.structures.cookie.CookieJar
 import org.json.JSONObject
 
-/**
- * Login Controller.
- * =================
- *
- * The InstagramUtils API works in a very particular manner. At the high level below is the process.
- *
- * 1. Fetch A CSRF Token
- *      This is achieved by placing a GET request to
- */
 class Authentication {
 
     companion object {
@@ -51,7 +42,7 @@ class Authentication {
     }
 
     private fun processLogin(username: String, password: String, token: String): SyntheticResponse.AuthenticationResult {
-        Instagram.getDefaultInstance().session.uuid = Crypto.generateUUID(true)
+        Instagram.getInstance().session.uuid = Crypto.generateUUID(true)
 
         // Generate the login payload.
         val deviceId = Crypto.generateDeviceId(username, password)
@@ -70,7 +61,7 @@ class Authentication {
                             SyntheticResponse.AuthenticationResult.Success(auth)
                         }
                         400 -> {
-                            Instagram.getDefaultInstance().session.cookieJar = it.cookies
+                            Instagram.getInstance().session.cookieJar = it.cookies
 
                             val result: SyntheticResponse.AuthenticationResult = when {
                                 it.jsonObject.optBoolean("two_factor_required") -> {
@@ -114,12 +105,12 @@ class Authentication {
 
     fun prepareAuthChallenge(path: String): SyntheticResponse.AuthChallengeResult {
         return get(url = String.format(Endpoints.CHALLENGE_PATH, path),
-                cookies = Instagram.getDefaultInstance().session.cookieJar ?: CookieJar(),
+                cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
                 headers = Crypto.HEADERS)
                 .let {
                     return@let when (it.statusCode) {
                         200 -> {
-                            Instagram.getDefaultInstance().session.cookieJar = it.cookies
+                            Instagram.getInstance().session.cookieJar = it.cookies
 
                             if (it.jsonObject.optString("step_name") == "select_verify_method") {
                                 SyntheticResponse.AuthChallengeResult.Success(it.jsonObject)
@@ -134,13 +125,13 @@ class Authentication {
 
     fun selectAuthChallengeMethod(path: String, method: String): SyntheticResponse.AuthMethodSelectedResult {
         return post(url = String.format(Endpoints.CHALLENGE_PATH, path),
-                cookies = Instagram.getDefaultInstance().session.cookieJar ?: CookieJar(),
+                cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
                 headers = Crypto.HEADERS,
                 data = hashMapOf("choice" to if (AUTH_METHOD_PHONE == method) 0 else 1))
                 .let { response: Response ->
                     return@let when (response.statusCode) {
                         200 -> {
-                            Instagram.getDefaultInstance().session.cookieJar = response.cookies
+                            Instagram.getInstance().session.cookieJar = response.cookies
 
                             when (response.jsonObject.optString("step_name")) {
                                 "verify_code" -> SyntheticResponse.AuthMethodSelectedResult.PhoneSelectionSuccess(response.jsonObject.optJSONObject("step_data")
@@ -157,7 +148,7 @@ class Authentication {
 
     fun submitChallengeCode(path: String, code: String): SyntheticResponse.ChallengeCodeSubmitResult {
         return post(url = String.format(Endpoints.CHALLENGE_PATH, path),
-                cookies = Instagram.getDefaultInstance().session.cookieJar ?: CookieJar(),
+                cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
                 headers = mapOf("User-Agent" to Crypto.buildUserAgent()),
                 data = hashMapOf("security_code" to Integer.parseInt(code)))
                 .let { response: Response ->

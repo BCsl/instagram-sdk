@@ -29,7 +29,7 @@ internal object Crypto {
 
     private const val USER_AGENT = "Instagram $APP_VERSION Android ($DEVICE_ANDROID_VERSION/$DEVICE_ANDROID_RELEASE; $DPI; $DISPLAY_RESOLUTION; $DEVICE_MANUFACTURER; $DEVICE_NAME; $DEVICE_MODEL; $CHIPSET; en_US; $VERSION_CODE)"
 
-    internal val HEADERS: HashMap<String, String> = hashMapOf(
+    val HEADERS: HashMap<String, String> = hashMapOf(
             "Accept-Encoding" to "gzip, deflate",
             "Connection" to "close",
             "Accept" to "*/*",
@@ -45,10 +45,10 @@ internal object Crypto {
                        androidVersion: Int = android.os.Build.VERSION.SDK_INT,
                        androidRelease: String = android.os.Build.VERSION.RELEASE,
                        chipset: String = android.os.Build.BOARD,
-                       dpi: String = Instagram.getDefaultInstance().configuration.deviceDPI,
-                       resolution: String = Instagram.getDefaultInstance().configuration.deviceResolution): String {
+                       dpi: String = Instagram.getInstance().configuration.deviceDPI,
+                       resolution: String = Instagram.getInstance().configuration.deviceResolution): String {
 
-        if (!Instagram.getDefaultInstance().configuration.deviceUA) {
+        if (!Instagram.getInstance().configuration.deviceUA) {
             return USER_AGENT
         }
 
@@ -69,7 +69,7 @@ internal object Crypto {
                 .put("phone_id", generateUUID(true))
                 .put("_csrftoken", token)
                 .put("username", username)
-                .put("guid", Instagram.getDefaultInstance().session.uuid.toString())
+                .put("guid", Instagram.getInstance().session.uuid.toString())
                 .put("device_id", deviceId)
                 .put("password", password)
                 .put("login_attempt_count", loginAttempts)

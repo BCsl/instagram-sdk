@@ -23,7 +23,7 @@ class Instagram private constructor(val configuration: Configuration) {
             instance = Instagram(configuration)
         }
 
-        fun getDefaultInstance(): Instagram {
+        fun getInstance(): Instagram {
             if (instance == null) {
                 throw IllegalStateException("Call `Instagram.init(...)` before calling this method.")
             }

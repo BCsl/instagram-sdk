@@ -23,7 +23,7 @@ class Account internal constructor() {
      */
     fun getAccount(primaryKey: String): SyntheticResponse = get(url = String.format(Endpoints.ACCOUNT_INFO, primaryKey),
             headers = Crypto.HEADERS,
-            cookies = Instagram.getDefaultInstance().session.cookieJar)
+            cookies = Instagram.getInstance().session.cookieJar)
             .let {
                 return@let when (it.statusCode) {
                     200 -> SyntheticResponse.Success(it.jsonObject.get("user").toString())
@@ -40,9 +40,9 @@ class Account internal constructor() {
      * @return  An observable which emits a SyntheticResponse.ProfileFeedResult object.
      */
     fun getFeed(primaryKey: String, maxId: String = "", minTimestamp: String = ""): SyntheticResponse.ProfileFeedResult {
-        return get(url = String.format(Endpoints.ACCOUNT_FEED, primaryKey, maxId, minTimestamp, "${Instagram.getDefaultInstance().session.pk}_${Instagram.getDefaultInstance().session.uuid}"),
+        return get(url = String.format(Endpoints.ACCOUNT_FEED, primaryKey, maxId, minTimestamp, "${Instagram.getInstance().session.pk}_${Instagram.getInstance().session.uuid}"),
                 headers = Crypto.HEADERS,
-                cookies = Instagram.getDefaultInstance().session.cookieJar)
+                cookies = Instagram.getInstance().session.cookieJar)
                 .let {
                     return@let when (it.statusCode) {
                         200 -> SyntheticResponse.ProfileFeedResult.Success(it.jsonObject.optJSONArray("items")
@@ -59,9 +59,9 @@ class Account internal constructor() {
         }
 
         // Synchronous call.
-        val response = khttp.get(url = String.format(endpoint, userId, "${Instagram.getDefaultInstance().session.pk}_${Instagram.getDefaultInstance().session.uuid}", maxId),
+        val response = khttp.get(url = String.format(endpoint, userId, "${Instagram.getInstance().session.pk}_${Instagram.getInstance().session.uuid}", maxId),
                 headers = Crypto.HEADERS,
-                cookies = Instagram.getDefaultInstance().session.cookieJar)
+                cookies = Instagram.getInstance().session.cookieJar)
 
         if (response.statusCode != 200) {
             return SyntheticResponse.RelationshipFetchResult.Failure("Status Code: ${response.statusCode}, Message: ${response.text}.")

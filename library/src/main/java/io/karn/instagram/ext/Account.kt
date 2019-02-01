@@ -7,27 +7,27 @@ import io.karn.instagram.endpoints.Account
 import io.reactivex.Single
 import java.io.IOException
 
-fun Account.getAccountSingle(primaryKey: String): Single<SyntheticResponse> {
+fun Account.getAccount(primaryKey: String): Single<SyntheticResponse> {
     return Single.create<SyntheticResponse> { it.onSuccess(this.getAccount(primaryKey)) }
             .onErrorReturn { SyntheticResponse.Failure(it.message ?: Errors.ERROR_UNKNOWN) }
 }
 
-fun Account.getFeedSingle(primaryKey: String, maxId: String = "", minTimestamp: String = ""): Single<SyntheticResponse.ProfileFeedResult> {
+fun Account.getFeed(primaryKey: String, maxId: String = "", minTimestamp: String = ""): Single<SyntheticResponse.ProfileFeedResult> {
     return Single.create<SyntheticResponse.ProfileFeedResult> { it.onSuccess(this.getFeed(primaryKey, maxId, minTimestamp)) }
             .onErrorReturn {
                 SyntheticResponse.ProfileFeedResult.Failure(it.message ?: Errors.ERROR_UNKNOWN)
             }
 }
 
-fun Account.getFollowersSingle(userId: String, reducer: (SyntheticResponse.RelationshipFetchResult) -> Unit): Single<String> {
-    return getRelationshipSingle(Account.RELATIONSHIP_FOLLOWERS, userId, "", reducer).onErrorReturn { "" }
+fun Account.getFollowers(userId: String, reducer: (SyntheticResponse.RelationshipFetchResult) -> Unit): Single<String> {
+    return getRelationship(Account.RELATIONSHIP_FOLLOWERS, userId, "", reducer).onErrorReturn { "" }
 }
 
 fun Account.getFollowingSingle(userId: String, reducer: (SyntheticResponse.RelationshipFetchResult) -> Unit): Single<String> {
-    return getRelationshipSingle(Account.RELATIONSHIP_FOLLOWING, userId, "", reducer).onErrorReturn { "" }
+    return getRelationship(Account.RELATIONSHIP_FOLLOWING, userId, "", reducer).onErrorReturn { "" }
 }
 
-private fun Account.getRelationshipSingle(relationship: String, userId: String, maxId: String, reducer: (SyntheticResponse.RelationshipFetchResult) -> Unit): Single<String> {
+private fun Account.getRelationship(relationship: String, userId: String, maxId: String, reducer: (SyntheticResponse.RelationshipFetchResult) -> Unit): Single<String> {
     return Single.create<String> { emitter ->
 
         var nextMaxId = maxId
@@ -44,7 +44,7 @@ private fun Account.getRelationshipSingle(relationship: String, userId: String, 
                 is SyntheticResponse.RelationshipFetchResult.Success -> {
                     totalProfilesFound += result.relationships.length()
 
-                    if (totalProfilesFound >= Instagram.getDefaultInstance().configuration.maxRelationshipFetch)
+                    if (totalProfilesFound >= Instagram.getInstance().configuration.maxRelationshipFetch)
                         ""
                     else
                         result.nextMaxId.takeIf { it != "null" } ?: ""
