@@ -1,10 +1,9 @@
 ![kHttp](./docs/assets/logo.svg)
 
 ## Instagram-SDK
-An unofficial Instagram SDK written in Kotlin.
+An unofficial Instagram SDK for Android written in Kotlin.
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.3.11-blue.svg?style=flat-square)](http://kotlinlang.org)
-[![RxJava](https://img.shields.io/badge/RxJava-2.1.10-green.svg?style=flat-square)](http://github.com/ReactiveX/RxJava)
 [![Build Status](https://img.shields.io/travis/Karn/instagram-sdk.svg?style=flat-square)](https://travis-ci.org/Karn/instagram-sdk)
 [![Codecov](https://img.shields.io/codecov/c/github/karn/instagram-sdk.svg?style=flat-square)](https://codecov.io/gh/Karn/instagram-sdk)
 [![GitHub (pre-)release](https://img.shields.io/github/release/karn/instagram-sdk/all.svg?style=flat-square)

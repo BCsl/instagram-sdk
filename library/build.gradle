@@ -56,10 +56,8 @@ allprojects {
 dependencies {
     implementation config.deps.kotlin.stdlib
 
-    implementation config.deps.rx.kotlin
-
     // Http Library
-    implementation 'io.karn:khttp-android:0.1.0'
+    implementation config.deps.khttp
 
     testImplementation config.testDeps.kotlin_test
     testImplementation config.testDeps.junit
