@@ -6,9 +6,8 @@ import common.Errors
 import core.Crypto
 import core.Endpoints
 import core.SyntheticResponse
-import io.reactivex.Single
-import khttp.extensions.get
-import khttp.extensions.post
+import khttp.get
+import khttp.post
 import khttp.responses.Response
 import khttp.structures.cookie.CookieJar
 import org.json.JSONObject
@@ -31,7 +30,7 @@ class Authentication {
         const val AUTH_METHOD_PHONE = "phone"
     }
 
-    fun authenticate(username: String, password: String, token: String? = null): Single<SyntheticResponse.AuthenticationResult> {
+    fun authenticate(username: String, password: String, token: String? = null): SyntheticResponse.AuthenticationResult {
         if (!TextUtils.isEmpty(token)) {
             // Go straight to login.
             return processLogin(username, password, token!!)
@@ -40,19 +39,18 @@ class Authentication {
         return get(url = String.format(Endpoints.CSRF_TOKEN, Crypto.generateUUID(false)),
                 headers = Crypto.HEADERS,
                 allowRedirects = true)
-                .map { response: Response ->
-                    return@map when (response.statusCode) {
+                .let { response: Response ->
+                    return@let when (response.statusCode) {
                         200 -> {
                             val csrfToken = parseCSRFToken(response)
-                            processLogin(username, password, csrfToken).blockingGet()
+                            processLogin(username, password, csrfToken)
                         }
                         else -> SyntheticResponse.AuthenticationResult.TokenFailure(response.statusCode, response.jsonObject)
                     }
                 }
-                .onErrorReturn { SyntheticResponse.AuthenticationResult.Error(it) }
     }
 
-    private fun processLogin(username: String, password: String, token: String): Single<SyntheticResponse.AuthenticationResult> {
+    private fun processLogin(username: String, password: String, token: String): SyntheticResponse.AuthenticationResult {
         Instagram.getDefaultInstance().session.uuid = Crypto.generateUUID(true)
 
         // Generate the login payload.
@@ -63,8 +61,8 @@ class Authentication {
                 headers = Crypto.HEADERS,
                 allowRedirects = true,
                 data = data)
-                .map {
-                    return@map when (it.statusCode) {
+                .let {
+                    return@let when (it.statusCode) {
                         200 -> {
                             val auth = it.jsonObject
                             auth.put(MEMBER_COOKIE, Crypto.serializeCookies(it.cookies))
@@ -93,19 +91,16 @@ class Authentication {
                         else -> SyntheticResponse.AuthenticationResult.ApiFailure(it.statusCode, it.jsonObject)
                     }
                 }
-                .onErrorReturn {
-                    SyntheticResponse.AuthenticationResult.Failure(it.message ?: Errors.ERROR_UNKNOWN)
-                }
     }
 
-    fun twoFactorLogin(code: String, identifier: String, token: String, deviceId: String, username: String, password: String): Single<SyntheticResponse.TwoFactorAuthResult> {
+    fun twoFactorLogin(code: String, identifier: String, token: String, deviceId: String, username: String, password: String): SyntheticResponse.TwoFactorAuthResult {
         val data = Crypto.generateTwoFactorPayload(code.replace("\\s".toRegex(), ""), identifier, token, username, password, deviceId)
 
         return post(url = Endpoints.LOGIN_APPROVAL,
                 headers = Crypto.HEADERS,
                 data = data)
-                .map { response: Response ->
-                    return@map when (response.statusCode) {
+                .let { response: Response ->
+                    return@let when (response.statusCode) {
                         200 -> {
                             val auth = response.jsonObject
                             auth.put(MEMBER_COOKIE, Crypto.serializeCookies(response.cookies))
@@ -115,17 +110,14 @@ class Authentication {
                         else -> SyntheticResponse.TwoFactorAuthResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
                     }
                 }
-                .onErrorReturn {
-                    SyntheticResponse.TwoFactorAuthResult.Failure(it.message ?: Errors.ERROR_UNKNOWN)
-                }
     }
 
-    fun prepareAuthChallenge(path: String): Single<SyntheticResponse.AuthChallengeResult> {
+    fun prepareAuthChallenge(path: String): SyntheticResponse.AuthChallengeResult {
         return get(url = String.format(Endpoints.CHALLENGE_PATH, path),
                 cookies = Instagram.getDefaultInstance().session.cookieJar ?: CookieJar(),
                 headers = Crypto.HEADERS)
-                .map {
-                    return@map when (it.statusCode) {
+                .let {
+                    return@let when (it.statusCode) {
                         200 -> {
                             Instagram.getDefaultInstance().session.cookieJar = it.cookies
 
@@ -138,18 +130,15 @@ class Authentication {
                         else -> SyntheticResponse.AuthChallengeResult.Failure(it.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
                     }
                 }
-                .onErrorReturn {
-                    SyntheticResponse.AuthChallengeResult.Failure(it.message ?: Errors.ERROR_UNKNOWN)
-                }
     }
 
-    fun selectAuthChallengeMethod(path: String, method: String): Single<SyntheticResponse.AuthMethodSelectedResult> {
+    fun selectAuthChallengeMethod(path: String, method: String): SyntheticResponse.AuthMethodSelectedResult {
         return post(url = String.format(Endpoints.CHALLENGE_PATH, path),
                 cookies = Instagram.getDefaultInstance().session.cookieJar ?: CookieJar(),
                 headers = Crypto.HEADERS,
                 data = hashMapOf("choice" to if (AUTH_METHOD_PHONE == method) 0 else 1))
-                .map { response: Response ->
-                    return@map when (response.statusCode) {
+                .let { response: Response ->
+                    return@let when (response.statusCode) {
                         200 -> {
                             Instagram.getDefaultInstance().session.cookieJar = response.cookies
 
@@ -164,18 +153,15 @@ class Authentication {
                         else -> SyntheticResponse.AuthMethodSelectedResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
                     }
                 }
-                .onErrorReturn {
-                    SyntheticResponse.AuthMethodSelectedResult.Failure(it.message ?: Errors.ERROR_UNKNOWN)
-                }
     }
 
-    fun submitChallengeCode(path: String, code: String): Single<SyntheticResponse.ChallengeCodeSubmitResult> {
+    fun submitChallengeCode(path: String, code: String): SyntheticResponse.ChallengeCodeSubmitResult {
         return post(url = String.format(Endpoints.CHALLENGE_PATH, path),
                 cookies = Instagram.getDefaultInstance().session.cookieJar ?: CookieJar(),
                 headers = mapOf("User-Agent" to Crypto.buildUserAgent()),
                 data = hashMapOf("security_code" to Integer.parseInt(code)))
-                .map { response: Response ->
-                    return@map when (response.statusCode) {
+                .let { response: Response ->
+                    return@let when (response.statusCode) {
                         200 -> {
                             val token = parseCSRFToken(response)
                             SyntheticResponse.ChallengeCodeSubmitResult.Success(token)
@@ -183,21 +169,17 @@ class Authentication {
                         else -> SyntheticResponse.ChallengeCodeSubmitResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
                     }
                 }
-                .onErrorReturn {
-                    SyntheticResponse.ChallengeCodeSubmitResult.Failure(it.message ?: Errors.ERROR_UNKNOWN)
-                }
     }
 
-    fun logoutUser(): Single<SyntheticResponse> {
+    fun logoutUser(): SyntheticResponse {
         return get(url = Endpoints.LOGOUT,
                 headers = Crypto.HEADERS)
-                .map { response: Response ->
-                    return@map when (response.statusCode) {
+                .let { response: Response ->
+                    return@let when (response.statusCode) {
                         200 -> SyntheticResponse.Success(Unit)
                         else -> SyntheticResponse.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
                     }
                 }
-                .onErrorReturn { SyntheticResponse.Failure(it.message ?: Errors.ERROR_UNKNOWN) }
     }
 
     private fun parseCSRFToken(response: Response): String {

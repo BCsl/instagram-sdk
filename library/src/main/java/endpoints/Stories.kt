@@ -5,8 +5,7 @@ import common.Errors
 import core.Crypto
 import core.Endpoints
 import core.SyntheticResponse
-import io.reactivex.Single
-import khttp.extensions.get
+import khttp.get
 import org.json.JSONArray
 
 class Stories {
@@ -16,21 +15,19 @@ class Stories {
         private const val MEMBER_REEL_ITEMS = "items"
     }
 
-    fun getStories(primaryKey: String): Single<SyntheticResponse.StoryReelResult> {
-        return get(url = String.format(Endpoints.STORIES, primaryKey),
-                headers = Crypto.HEADERS,
-                cookies = Instagram.getDefaultInstance().session.cookieJar)
-                .map {
-                    return@map when (it.statusCode) {
-                        200 -> {
-                            val reel = it.jsonObject.optJSONObject(MEMBER_REEL)
-                                    ?.optJSONArray(MEMBER_REEL_ITEMS)
-                                    ?: JSONArray()
+    fun getStories(primaryKey: String): SyntheticResponse.StoryReelResult = get(url = String.format(Endpoints.STORIES, primaryKey),
+            headers = Crypto.HEADERS,
+            cookies = Instagram.getDefaultInstance().session.cookieJar)
+            .let {
+                return@let when (it.statusCode) {
+                    200 -> {
+                        val reel = it.jsonObject.optJSONObject(MEMBER_REEL)
+                                ?.optJSONArray(MEMBER_REEL_ITEMS)
+                                ?: JSONArray()
 
-                            SyntheticResponse.StoryReelResult.Success(reel)
-                        }
-                        else -> SyntheticResponse.StoryReelResult.Failure(String.format(Errors.ERROR_STORIES_FAILED, it.statusCode, it.text))
+                        SyntheticResponse.StoryReelResult.Success(reel)
                     }
+                    else -> SyntheticResponse.StoryReelResult.Failure(String.format(Errors.ERROR_STORIES_FAILED, it.statusCode, it.text))
                 }
-    }
+            }
 }

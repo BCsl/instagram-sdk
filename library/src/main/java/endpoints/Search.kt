@@ -5,8 +5,7 @@ import common.Errors
 import core.Crypto
 import core.Endpoints
 import core.SyntheticResponse
-import io.reactivex.Single
-import khttp.extensions.get
+import khttp.get
 import org.json.JSONArray
 
 class Search {
@@ -22,23 +21,21 @@ class Search {
      * @param query The search term that is being queried.
      * @return  An observable that emits a SyntheticResponse.ProfileSearchResult object.
      */
-    fun search(query: String): Single<SyntheticResponse.ProfileSearchResult> {
-        return get(url = String.format(Endpoints.SEARCH, "${Instagram.getDefaultInstance().session.pk}_${Instagram.getDefaultInstance().session.uuid}", query),
-                headers = Crypto.HEADERS,
-                cookies = Instagram.getDefaultInstance().session.cookieJar)
-                .map {
-                    return@map when (it.statusCode) {
-                        200 -> {
-                            val profiles = it.jsonObject.optJSONArray(MEMBER_NAME_USERS) ?: JSONArray()
+    fun search(query: String): SyntheticResponse.ProfileSearchResult = get(url = String.format(Endpoints.SEARCH, "${Instagram.getDefaultInstance().session.pk}_${Instagram.getDefaultInstance().session.uuid}", query),
+            headers = Crypto.HEADERS,
+            cookies = Instagram.getDefaultInstance().session.cookieJar)
+            .let {
+                return@let when (it.statusCode) {
+                    200 -> {
+                        val profiles = it.jsonObject.optJSONArray(MEMBER_NAME_USERS) ?: JSONArray()
 
-                            if (profiles.length() == 0) {
-                                SyntheticResponse.ProfileSearchResult.Failure(Errors.ERROR_SEARCH_NO_RESULTS)
-                            } else {
-                                SyntheticResponse.ProfileSearchResult.Success(profiles)
-                            }
+                        if (profiles.length() == 0) {
+                            SyntheticResponse.ProfileSearchResult.Failure(Errors.ERROR_SEARCH_NO_RESULTS)
+                        } else {
+                            SyntheticResponse.ProfileSearchResult.Success(profiles)
                         }
-                        else -> SyntheticResponse.ProfileSearchResult.Failure(String.format(Errors.ERROR_INCOMPLETE_SEARCH, it.statusCode, it.text))
                     }
+                    else -> SyntheticResponse.ProfileSearchResult.Failure(String.format(Errors.ERROR_INCOMPLETE_SEARCH, it.statusCode, it.text))
                 }
-    }
+            }
 }
