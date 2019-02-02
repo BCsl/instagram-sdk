@@ -8,26 +8,27 @@ import io.karn.instagram.core.SyntheticResponse
 import khttp.get
 import org.json.JSONArray
 
-class Stories {
+class Stories internal constructor() {
 
-    companion object {
-        private const val MEMBER_REEL = "reel"
-        private const val MEMBER_REEL_ITEMS = "items"
-    }
-
-    fun getStories(primaryKey: String): SyntheticResponse.StoryReelResult = get(url = String.format(Endpoints.STORIES, primaryKey),
+    /**
+     * Create a SyntheticResponse from the response of a story reel API request.
+     *
+     * @param primaryKey    The Primary Key associated with the profile.
+     * @return  A {@link SyntheticResponse.StoryReel} object.
+     */
+    fun getStories(primaryKey: String): SyntheticResponse.StoryReel = get(url = String.format(Endpoints.STORIES, primaryKey),
             headers = Crypto.HEADERS,
             cookies = Instagram.getInstance().session.cookieJar)
             .let {
                 return@let when (it.statusCode) {
                     200 -> {
-                        val reel = it.jsonObject.optJSONObject(MEMBER_REEL)
-                                ?.optJSONArray(MEMBER_REEL_ITEMS)
+                        val reel = it.jsonObject.optJSONObject("reel")
+                                ?.optJSONArray("items")
                                 ?: JSONArray()
 
-                        SyntheticResponse.StoryReelResult.Success(reel)
+                        SyntheticResponse.StoryReel.Success(reel)
                     }
-                    else -> SyntheticResponse.StoryReelResult.Failure(String.format(Errors.ERROR_STORIES_FAILED, it.statusCode, it.text))
+                    else -> SyntheticResponse.StoryReel.Failure(String.format(Errors.ERROR_STORIES_FAILED, it.statusCode, it.text))
                 }
             }
 }

@@ -8,14 +8,23 @@ import io.karn.instagram.endpoints.Search
 import io.karn.instagram.endpoints.Stories
 import khttp.KHttpConfig
 
+/**
+ * The 'Instagram' class is the primary entry point for SDK related functions. Be sure to execute the
+ * {@link #init(Configuration)} function to initialize the library with default or custom configuration.
+ *
+ * Note the the SDK itself is synchronous and allows the developer the flexibility to implement their
+ * preferred async pattern.
+ */
 class Instagram private constructor(val configuration: Configuration) {
 
     companion object {
+        private val NOT_INITIALIZED_ERROR = IllegalStateException("Call `Instagram.init(...)` before calling this method.")
 
         private var instance: Instagram? = null
 
         /**
-         * Initialize with configurations and feature toggles.
+         * Initialize the Instagram SDK with the provided configuration. This function must be executed before other
+         * parts of the library are interacted with.
          */
         fun init(configuration: Configuration = Configuration()) {
             if (instance != null) return
@@ -24,23 +33,24 @@ class Instagram private constructor(val configuration: Configuration) {
         }
 
         fun getInstance(): Instagram {
-            if (instance == null) {
-                throw IllegalStateException("Call `Instagram.init(...)` before calling this method.")
-            }
+            return instance ?: throw NOT_INITIALIZED_ERROR
+        }
 
-            return instance as Instagram
+        fun getSession(): Session {
+            return instance?.session ?: throw NOT_INITIALIZED_ERROR
         }
     }
 
-    val session: Session = Session()
+    internal val session: Session = Session()
     val authentication: Authentication = Authentication()
     val account: Account = Account()
     val search: Search = Search()
     val stories: Stories = Stories()
 
     init {
+        // Log network calls if needed.
+        // TODO: Investigate whether or not we need instead a buffered logs.
         configuration.requestLogger?.let { logger ->
-
             KHttpConfig.attachInterceptor {
                 logger.invoke(it.request.method, it.request.url, it.statusCode)
             }

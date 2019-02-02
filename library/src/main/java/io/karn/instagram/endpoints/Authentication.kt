@@ -12,11 +12,9 @@ import khttp.responses.Response
 import khttp.structures.cookie.CookieJar
 import org.json.JSONObject
 
-class Authentication {
+class Authentication internal constructor() {
 
     companion object {
-        private const val MEMBER_COOKIE = "cookie"
-
         const val AUTH_METHOD_EMAIL = "email"
         const val AUTH_METHOD_PHONE = "phone"
     }
@@ -41,6 +39,87 @@ class Authentication {
                 }
     }
 
+    fun twoFactorLogin(code: String, identifier: String, token: String, deviceId: String, username: String, password: String): SyntheticResponse.TwoFactorAuthResult {
+        val data = Crypto.generateTwoFactorPayload(code.replace("\\s".toRegex(), ""), identifier, token, username, password, deviceId)
+
+        return post(url = Endpoints.LOGIN_APPROVAL,
+                headers = Crypto.HEADERS,
+                data = data)
+                .let { response: Response ->
+                    return@let when (response.statusCode) {
+                        200 -> {
+                            val auth = response.jsonObject
+                            auth.put("cookie", Crypto.serializeCookies(response.cookies))
+
+                            SyntheticResponse.TwoFactorAuthResult.Success(auth)
+                        }
+                        else -> SyntheticResponse.TwoFactorAuthResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                    }
+                }
+    }
+
+    fun prepareAuthChallenge(path: String): SyntheticResponse.AuthChallengeResult = get(url = String.format(Endpoints.CHALLENGE_PATH, path),
+            cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
+            headers = Crypto.HEADERS)
+            .let {
+                return@let when (it.statusCode) {
+                    200 -> {
+                        Instagram.getInstance().session.cookieJar = it.cookies
+
+                        if (it.jsonObject.optString("step_name") == "select_verify_method") {
+                            SyntheticResponse.AuthChallengeResult.Success(it.jsonObject)
+                        } else {
+                            SyntheticResponse.AuthChallengeResult.Failure(it.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                        }
+                    }
+                    else -> SyntheticResponse.AuthChallengeResult.Failure(it.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                }
+            }
+
+    fun selectAuthChallengeMethod(path: String, method: String): SyntheticResponse.AuthMethodSelectedResult = post(url = String.format(Endpoints.CHALLENGE_PATH, path),
+            cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
+            headers = Crypto.HEADERS,
+            data = hashMapOf("choice" to if (AUTH_METHOD_PHONE == method) 0 else 1))
+            .let { response: Response ->
+                return@let when (response.statusCode) {
+                    200 -> {
+                        Instagram.getInstance().session.cookieJar = response.cookies
+
+                        when (response.jsonObject.optString("step_name")) {
+                            "verify_code" -> SyntheticResponse.AuthMethodSelectedResult.PhoneSelectionSuccess(response.jsonObject.optJSONObject("step_data")
+                                    ?: JSONObject())
+                            "verify_email" -> SyntheticResponse.AuthMethodSelectedResult.EmailSelectionSuccess(response.jsonObject.optJSONObject("step_data")
+                                    ?: JSONObject())
+                            else -> SyntheticResponse.AuthMethodSelectedResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                        }
+                    }
+                    else -> SyntheticResponse.AuthMethodSelectedResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                }
+            }
+
+    fun submitChallengeCode(path: String, code: String): SyntheticResponse.ChallengeCodeSubmitResult = post(url = String.format(Endpoints.CHALLENGE_PATH, path),
+            cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
+            headers = mapOf("User-Agent" to Crypto.buildUserAgent()),
+            data = hashMapOf("security_code" to Integer.parseInt(code)))
+            .let { response: Response ->
+                return@let when (response.statusCode) {
+                    200 -> {
+                        val token = parseCSRFToken(response)
+                        SyntheticResponse.ChallengeCodeSubmitResult.Success(token)
+                    }
+                    else -> SyntheticResponse.ChallengeCodeSubmitResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                }
+            }
+
+    fun logoutUser(): SyntheticResponse.Logout = get(url = Endpoints.LOGOUT,
+            headers = Crypto.HEADERS)
+            .let { response: Response ->
+                return@let when (response.statusCode) {
+                    200 -> SyntheticResponse.Logout.Success(response.statusCode)
+                    else -> SyntheticResponse.Logout.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                }
+            }
+
     private fun processLogin(username: String, password: String, token: String): SyntheticResponse.AuthenticationResult {
         Instagram.getInstance().session.uuid = Crypto.generateUUID(true)
 
@@ -56,7 +135,7 @@ class Authentication {
                     return@let when (it.statusCode) {
                         200 -> {
                             val auth = it.jsonObject
-                            auth.put(MEMBER_COOKIE, Crypto.serializeCookies(it.cookies))
+                            auth.put("cookie", Crypto.serializeCookies(it.cookies))
 
                             SyntheticResponse.AuthenticationResult.Success(auth)
                         }
@@ -84,97 +163,6 @@ class Authentication {
                 }
     }
 
-    fun twoFactorLogin(code: String, identifier: String, token: String, deviceId: String, username: String, password: String): SyntheticResponse.TwoFactorAuthResult {
-        val data = Crypto.generateTwoFactorPayload(code.replace("\\s".toRegex(), ""), identifier, token, username, password, deviceId)
-
-        return post(url = Endpoints.LOGIN_APPROVAL,
-                headers = Crypto.HEADERS,
-                data = data)
-                .let { response: Response ->
-                    return@let when (response.statusCode) {
-                        200 -> {
-                            val auth = response.jsonObject
-                            auth.put(MEMBER_COOKIE, Crypto.serializeCookies(response.cookies))
-
-                            SyntheticResponse.TwoFactorAuthResult.Success(auth)
-                        }
-                        else -> SyntheticResponse.TwoFactorAuthResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
-                    }
-                }
-    }
-
-    fun prepareAuthChallenge(path: String): SyntheticResponse.AuthChallengeResult {
-        return get(url = String.format(Endpoints.CHALLENGE_PATH, path),
-                cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
-                headers = Crypto.HEADERS)
-                .let {
-                    return@let when (it.statusCode) {
-                        200 -> {
-                            Instagram.getInstance().session.cookieJar = it.cookies
-
-                            if (it.jsonObject.optString("step_name") == "select_verify_method") {
-                                SyntheticResponse.AuthChallengeResult.Success(it.jsonObject)
-                            } else {
-                                SyntheticResponse.AuthChallengeResult.Failure(it.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
-                            }
-                        }
-                        else -> SyntheticResponse.AuthChallengeResult.Failure(it.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
-                    }
-                }
-    }
-
-    fun selectAuthChallengeMethod(path: String, method: String): SyntheticResponse.AuthMethodSelectedResult {
-        return post(url = String.format(Endpoints.CHALLENGE_PATH, path),
-                cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
-                headers = Crypto.HEADERS,
-                data = hashMapOf("choice" to if (AUTH_METHOD_PHONE == method) 0 else 1))
-                .let { response: Response ->
-                    return@let when (response.statusCode) {
-                        200 -> {
-                            Instagram.getInstance().session.cookieJar = response.cookies
-
-                            when (response.jsonObject.optString("step_name")) {
-                                "verify_code" -> SyntheticResponse.AuthMethodSelectedResult.PhoneSelectionSuccess(response.jsonObject.optJSONObject("step_data")
-                                        ?: JSONObject())
-                                "verify_email" -> SyntheticResponse.AuthMethodSelectedResult.EmailSelectionSuccess(response.jsonObject.optJSONObject("step_data")
-                                        ?: JSONObject())
-                                else -> SyntheticResponse.AuthMethodSelectedResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
-                            }
-                        }
-                        else -> SyntheticResponse.AuthMethodSelectedResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
-                    }
-                }
-    }
-
-    fun submitChallengeCode(path: String, code: String): SyntheticResponse.ChallengeCodeSubmitResult {
-        return post(url = String.format(Endpoints.CHALLENGE_PATH, path),
-                cookies = Instagram.getInstance().session.cookieJar ?: CookieJar(),
-                headers = mapOf("User-Agent" to Crypto.buildUserAgent()),
-                data = hashMapOf("security_code" to Integer.parseInt(code)))
-                .let { response: Response ->
-                    return@let when (response.statusCode) {
-                        200 -> {
-                            val token = parseCSRFToken(response)
-                            SyntheticResponse.ChallengeCodeSubmitResult.Success(token)
-                        }
-                        else -> SyntheticResponse.ChallengeCodeSubmitResult.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
-                    }
-                }
-    }
-
-    fun logoutUser(): SyntheticResponse {
-        return get(url = Endpoints.LOGOUT,
-                headers = Crypto.HEADERS)
-                .let { response: Response ->
-                    return@let when (response.statusCode) {
-                        200 -> SyntheticResponse.Success(Unit)
-                        else -> SyntheticResponse.Failure(response.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
-                    }
-                }
-    }
-
-    private fun parseCSRFToken(response: Response): String {
-        return response.cookies.getCookie("csrftoken")?.value?.toString()
-                ?: throw Errors.TokenFetchException(Errors.ERROR_INVALID_CSRF)
-    }
+    private fun parseCSRFToken(response: Response): String = response.cookies.getCookie("csrftoken")?.value?.toString()
+            ?: throw Errors.TokenFetchException(Errors.ERROR_INVALID_CSRF)
 }

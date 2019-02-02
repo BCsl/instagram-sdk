@@ -2,7 +2,6 @@ package io.karn.instagram.common
 
 object Errors {
     const val ERROR_UNKNOWN = "An unknown error occurred."
-    const val ERROR_INVALID_TOKEN = "Unable to attempt authentication. Ensure that you are not connected to a proxy."
     internal const val ERROR_INVALID_CSRF = "Unable to fetch authentication token."
     internal const val ERROR_ACCOUNT_FETCH = "Unable to fetch account details. Error code: %s Message: %s"
     internal const val ERROR_FEED_FETCH = "Unable to fetch feed. Error code: %s Message: %s"

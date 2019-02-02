@@ -2,6 +2,9 @@ package io.karn.instagram.core
 
 import khttp.structures.cookie.CookieJar
 
+/**
+ * The Session class maintains the Session metadata for the current instance of the library.
+ */
 class Session {
     var pk: String? = null
     var uuid: String? = null

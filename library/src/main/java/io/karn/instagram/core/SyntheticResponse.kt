@@ -5,10 +5,6 @@ import org.json.JSONObject
 
 sealed class SyntheticResponse {
 
-    data class Success<out T>(val data: T) : SyntheticResponse()
-
-    data class Failure(val message: String) : SyntheticResponse()
-
     sealed class AuthenticationResult : SyntheticResponse() {
         data class Success(val data: JSONObject) : AuthenticationResult()
 
@@ -53,27 +49,39 @@ sealed class SyntheticResponse {
         data class Failure(val message: String) : ChallengeCodeSubmitResult()
     }
 
-    sealed class RelationshipFetchResult : SyntheticResponse() {
-        data class Success(val nextMaxId: String, val relationships: JSONArray) : RelationshipFetchResult()
+    sealed class AccountDetails : SyntheticResponse() {
+        data class Success(val details: JSONObject) : AccountDetails()
 
-        data class Failure(val message: String) : RelationshipFetchResult()
+        data class Failure(val message: String) : AccountDetails()
     }
 
-    sealed class ProfileSearchResult : SyntheticResponse() {
-        data class Success(val profiles: JSONArray) : ProfileSearchResult()
+    sealed class Relationships : SyntheticResponse() {
+        data class Success(val nextMaxId: String, val relationships: JSONArray) : Relationships()
 
-        data class Failure(val message: String) : ProfileSearchResult()
+        data class Failure(val message: String) : Relationships()
     }
 
-    sealed class StoryReelResult : SyntheticResponse() {
-        data class Success(val stories: JSONArray) : StoryReelResult()
+    sealed class ProfileSearch : SyntheticResponse() {
+        data class Success(val profiles: JSONArray) : ProfileSearch()
 
-        data class Failure(val message: String) : StoryReelResult()
+        data class Failure(val message: String) : ProfileSearch()
     }
 
-    sealed class ProfileFeedResult : SyntheticResponse() {
-        data class Success(val feed: JSONArray) : ProfileFeedResult()
+    sealed class StoryReel : SyntheticResponse() {
+        data class Success(val stories: JSONArray) : StoryReel()
 
-        data class Failure(val message: String) : ProfileFeedResult()
+        data class Failure(val message: String) : StoryReel()
+    }
+
+    sealed class ProfileFeed : SyntheticResponse() {
+        data class Success(val feed: JSONArray) : ProfileFeed()
+
+        data class Failure(val message: String) : ProfileFeed()
+    }
+
+    sealed class Logout : SyntheticResponse() {
+        data class Success(val statusCode: Int) : Logout()
+
+        data class Failure(val message: String) : Logout()
     }
 }

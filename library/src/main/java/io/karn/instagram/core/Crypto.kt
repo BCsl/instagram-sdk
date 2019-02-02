@@ -7,12 +7,13 @@ import org.json.JSONObject
 import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.security.MessageDigest
-import java.util.*
+import java.util.HashMap
+import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 internal object Crypto {
-    const val SIG_KEY = "673581b0ddb792bf47da5f9ca816b613d7996f342723aa06993a3f0552311c7d"
+    private const val SIG_KEY = "673581b0ddb792bf47da5f9ca816b613d7996f342723aa06993a3f0552311c7d"
     const val SIG_VERSION = "4"
 
     private const val APP_VERSION = "42.0.0.19.95"
@@ -96,9 +97,7 @@ internal object Crypto {
         return bytesToHex(digestBytes)
     }
 
-    private fun md5Hex(source: String): String {
-        return digest("MD5", source)
-    }
+    private fun md5Hex(source: String): String = digest("MD5", source)
 
     fun generateDeviceId(username: String, password: String): String {
         val seed = md5Hex(username + password)
@@ -109,9 +108,9 @@ internal object Crypto {
 
     private fun bytesToHex(bytes: ByteArray): String {
         val builder = StringBuilder()
-        for (b in bytes) {
-            builder.append(String.format("%02x", b))
-        }
+
+        bytes.forEach { builder.append(String.format("%02x", it)) }
+
         return builder.toString()
     }
 
@@ -131,6 +130,9 @@ internal object Crypto {
         return ("ig_sig_key_version=$SIG_VERSION&signed_body=$signedBody.$parsedData")
     }
 
+    /**
+     * TODO: Implement a better cookie serialization algorithm.
+     */
     internal fun serializeCookies(cookieJar: CookieJar?): String {
         var cookieStr = ""
 
@@ -154,6 +156,9 @@ internal object Crypto {
         return cookieStr
     }
 
+    /**
+     * TODO: Implement a better cookie deserialization algorithm.
+     */
     fun deserializeCookies(cookieString: String): CookieJar {
         val cookieJar = CookieJar()
 
