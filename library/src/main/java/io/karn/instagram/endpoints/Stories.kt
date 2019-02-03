@@ -4,6 +4,7 @@ import io.karn.instagram.Instagram
 import io.karn.instagram.api.StoriesAPI
 import io.karn.instagram.common.Errors
 import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.common.wrapAPIException
 import org.json.JSONArray
 
 class Stories internal constructor() {
@@ -14,18 +15,18 @@ class Stories internal constructor() {
      * @param userKey    The User Key associated with the profile.
      * @return  A {@link SyntheticResponse.StoryReel} object.
      */
-    fun getStories(userKey: String): SyntheticResponse.StoryReel =
-            StoriesAPI.getStories(userKey, Instagram.session)
-                    .let {
-                        return@let when (it.statusCode) {
-                            200 -> {
-                                val reel = it.jsonObject.optJSONObject("reel")
-                                        ?.optJSONArray("items")
-                                        ?: JSONArray()
+    fun getStories(userKey: String): SyntheticResponse.StoryReel {
+        val res = wrapAPIException { StoriesAPI.getStories(userKey, Instagram.session) }
 
-                                SyntheticResponse.StoryReel.Success(reel)
-                            }
-                            else -> SyntheticResponse.StoryReel.Failure(String.format(Errors.ERROR_STORIES_FAILED, it.statusCode, it.text))
-                        }
-                    }
+        return when (res.statusCode) {
+            200 -> {
+                val reel = res.jsonObject.optJSONObject("reel")
+                        ?.optJSONArray("items")
+                        ?: JSONArray()
+
+                SyntheticResponse.StoryReel.Success(reel)
+            }
+            else -> SyntheticResponse.StoryReel.Failure(String.format(Errors.ERROR_STORIES_FAILED, res.statusCode, res.text))
+        }
+    }
 }

@@ -14,19 +14,20 @@ class Search internal constructor() {
      * @param query The search term that is being queried.
      * @return  A {@link SyntheticResponse.ProfileSearch} object.
      */
-    fun search(query: String): SyntheticResponse.ProfileSearch = SearchAPI.search(query, Instagram.session)
-            .let {
-                return@let when (it.statusCode) {
-                    200 -> {
-                        val profiles = it.jsonObject.optJSONArray("users") ?: JSONArray()
+    fun search(query: String): SyntheticResponse.ProfileSearch {
+        val res = SearchAPI.search(query, Instagram.session)
 
-                        if (profiles.length() == 0) {
-                            SyntheticResponse.ProfileSearch.Failure(Errors.ERROR_SEARCH_NO_RESULTS)
-                        } else {
-                            SyntheticResponse.ProfileSearch.Success(profiles)
-                        }
-                    }
-                    else -> SyntheticResponse.ProfileSearch.Failure(String.format(Errors.ERROR_INCOMPLETE_SEARCH, it.statusCode, it.text))
+        return when (res.statusCode) {
+            200 -> {
+                val profiles = res.jsonObject.optJSONArray("users") ?: JSONArray()
+
+                if (profiles.length() == 0) {
+                    SyntheticResponse.ProfileSearch.Failure(Errors.ERROR_SEARCH_NO_RESULTS)
+                } else {
+                    SyntheticResponse.ProfileSearch.Success(profiles)
                 }
             }
+            else -> SyntheticResponse.ProfileSearch.Failure(String.format(Errors.ERROR_INCOMPLETE_SEARCH, res.statusCode, res.text))
+        }
+    }
 }
