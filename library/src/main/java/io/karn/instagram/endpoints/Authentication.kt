@@ -9,6 +9,32 @@ import io.karn.instagram.core.Crypto
 import io.karn.instagram.core.SyntheticResponse
 import org.json.JSONObject
 
+/**
+ * Authentication
+ *
+ * Instagram authentication uses a cookie based authentication mechanism in addition to the CSRF token. Below are the
+ * Steps as well as the corresponding SDK functions which perform said step.
+ *
+ * 1. Admit one - Fetching the original token.
+ *   The first step in the authentication process is to retrieve a token with can be used to authenticate. This token is
+ *   then used, along with the account credentials to sign the user in.
+ *
+ *   We will defer to the next step for the SDK function which handles these together.
+ *
+ * 2. Authentication
+ *   The next step is to authenticate the user. The corresponding SDK function is [Authentication.authenticate].
+ *
+ *   The resulting SyntheticResponse maps the following states:
+ *   - Success -> The account has been authenticated, the result contains the serialized Cookies as well as the UUID used.
+ *                  The Cookies and UUID are used to restore the session after a cold start via [Session.buildSession].
+ *   - TwoFactorAuth -> The account has been authenticated but requires a two-factor code to authorize the login. A code
+ *                      will be sent to the primary two-factor method (phone number/email) associated with the account.
+ *                      The authentication can be completed via the [Authentication.twoFactor] function.
+ *   - ChallengeRequired -> The account has been flagged by the server for a suspicious login, a verification flow needs
+ *                          to be followed. The path for the challenge is provided and must be queried to
+ *   - InvalidCredentials ->
+ *   - ApiFailure ->
+ */
 class Authentication internal constructor() {
 
     companion object {
