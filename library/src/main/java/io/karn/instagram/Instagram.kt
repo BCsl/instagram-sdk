@@ -36,12 +36,16 @@ class Instagram private constructor(val configuration: Configuration) {
             return instance ?: throw NOT_INITIALIZED_ERROR
         }
 
-        fun getSession(): Session {
-            return instance?.session ?: throw NOT_INITIALIZED_ERROR
-        }
+        var session: Session
+            get() {
+                return instance?._session ?: throw NOT_INITIALIZED_ERROR
+            }
+            set(value) {
+                instance?._session = value
+            }
     }
 
-    internal val session: Session = Session()
+    private var _session: Session = Session()
     val authentication: Authentication = Authentication()
     val account: Account = Account()
     val search: Search = Search()
@@ -49,7 +53,7 @@ class Instagram private constructor(val configuration: Configuration) {
 
     init {
         // Log network calls if needed.
-        // TODO: Investigate whether or not we need instead a buffered logs.
+        // TODO: Investigate whether or not we need buffered writers instead.
         configuration.requestLogger?.let { logger ->
             KHttpConfig.attachInterceptor {
                 logger.invoke(it.request.method, it.request.url, it.statusCode)

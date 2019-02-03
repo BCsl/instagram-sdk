@@ -1,19 +1,19 @@
 package io.karn.instagram.core
 
 import khttp.structures.cookie.CookieJar
+import org.json.JSONArray
 
 /**
  * The Session class maintains the Session metadata for the current instance of the library.
  */
-class Session {
-    var pk: String? = null
-    var uuid: String? = null
-
-    var cookieJar: CookieJar? = null
-
-    fun loadAuthData(userPk: String?, uuid: String?, cookie: String) {
-        this.pk = userPk
-        this.uuid = uuid
-        this.cookieJar = Crypto.deserializeCookies(cookie)
+data class Session internal constructor(
+        internal val primaryKey: String = "",
+        internal var uuid: String = "",
+        internal var cookieJar: CookieJar = CookieJar()
+) {
+    companion object {
+        fun buildSession(primaryKey: String, uuid: String, cookies: String): Session {
+            return Session(primaryKey, uuid, CookieUtils.deserializeFromJson(JSONArray(cookies)))
+        }
     }
 }

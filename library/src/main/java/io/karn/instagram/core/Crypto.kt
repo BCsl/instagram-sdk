@@ -70,7 +70,7 @@ internal object Crypto {
                 .put("phone_id", generateUUID(true))
                 .put("_csrftoken", token)
                 .put("username", username)
-                .put("guid", Instagram.getInstance().session.uuid.toString())
+                .put("guid", Instagram.session.uuid)
                 .put("device_id", deviceId)
                 .put("password", password)
                 .put("login_attempt_count", loginAttempts)
@@ -128,61 +128,5 @@ internal object Crypto {
         val signedBody = generateSignedBody(SIG_KEY, payload)
 
         return ("ig_sig_key_version=$SIG_VERSION&signed_body=$signedBody.$parsedData")
-    }
-
-    /**
-     * TODO: Implement a better cookie serialization algorithm.
-     */
-    internal fun serializeCookies(cookieJar: CookieJar?): String {
-        var cookieStr = ""
-
-        cookieJar ?: return cookieStr
-
-        cookieJar.keys
-                .map { cookie: String -> cookieJar.getCookie(cookie) }
-                .forEach { cookie: Cookie? ->
-
-                    var attributeStr = ""
-
-                    if (cookie?.attributes != null) {
-                        for (k in cookie.attributes) {
-                            attributeStr += "$k|"
-                        }
-                    }
-
-                    cookieStr += "### ${cookie?.key}||${cookie?.value}||$attributeStr"
-                }
-
-        return cookieStr
-    }
-
-    /**
-     * TODO: Implement a better cookie deserialization algorithm.
-     */
-    fun deserializeCookies(cookieString: String): CookieJar {
-        val cookieJar = CookieJar()
-
-        if (cookieString.isBlank()) {
-            return cookieJar
-        }
-
-        for (item in cookieString.split("###")) {
-            if (item.isBlank()) continue
-
-            val rawCookie = item.split("||")
-
-            val attributes = hashMapOf<String, String>()
-            rawCookie[2].split("|")
-                    .map { it.split("=") }
-                    .forEach {
-                        if (it.size == 2) {
-                            attributes[it[0]] = it[1]
-                        }
-                    }
-
-            cookieJar.setCookie(cookie = Cookie(rawCookie[0], rawCookie[1], attributes))
-        }
-
-        return cookieJar
     }
 }

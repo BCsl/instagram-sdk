@@ -5,6 +5,12 @@ import org.json.JSONObject
 
 sealed class SyntheticResponse {
 
+    sealed class TokenQuery : SyntheticResponse() {
+        data class Success(val token: String) : TokenQuery()
+
+        data class Failure(val message: String) : TokenQuery()
+    }
+
     sealed class AuthenticationResult : SyntheticResponse() {
         data class Success(val data: JSONObject) : AuthenticationResult()
 
