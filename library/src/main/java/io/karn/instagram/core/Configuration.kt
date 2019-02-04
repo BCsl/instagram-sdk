@@ -14,8 +14,10 @@ data class Configuration(
          */
         @Experimental
         val deviceUA: Boolean = false,
-        internal val deviceDPI: String = Crypto.DPI,
-        internal val deviceResolution: String = Crypto.DISPLAY_RESOLUTION,
+        @Experimental
+        val deviceDPI: String = Crypto.DPI,
+        @Experimental
+        val deviceResolution: String = Crypto.DISPLAY_RESOLUTION,
         /**
          * Attach a logger to process API calls.
          */
