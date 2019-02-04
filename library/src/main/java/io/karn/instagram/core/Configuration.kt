@@ -20,8 +20,13 @@ data class Configuration(
         val deviceResolution: String = Crypto.DISPLAY_RESOLUTION,
         /**
          * Attach a logger to process API calls.
+         *
+         * @param requestMethod The standard HTTP request method -- e.g GET.
+         * @param url           The URL associated with the HTTP request.
+         * @param statusCode    The resulting status code -- e.g 200
+         * @param userAgent     The user-agent provided for the HTTP request.
          */
-        val requestLogger: ((String, String, Int) -> Unit)? = null
+        val requestLogger: ((requestMethod: String, url: String, statusCode: Int, userAgent: String) -> Unit)? = null
 ) {
     init {
         deviceDPI.takeIf { !it.isBlank() }
@@ -29,5 +34,15 @@ data class Configuration(
 
         deviceResolution.takeIf { !it.isBlank() }
                 ?: throw IllegalArgumentException("Must specify a valid resolution value -- e.g '1080x1920'.")
+    }
+
+    companion object {
+        fun getDefaultUserAgent(): String {
+            return Crypto.USER_AGENT
+        }
+
+        fun getUserAgent(): String {
+            return Crypto.buildUserAgent()
+        }
     }
 }
