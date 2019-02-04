@@ -1,5 +1,7 @@
 package io.karn.instagram.core
 
+import io.karn.instagram.common.Experimental
+
 
 /**
  * Configuration data class for the library, modify the attributes when initializing the library to change its behaviour
@@ -7,9 +9,11 @@ package io.karn.instagram.core
  */
 data class Configuration(
         /**
-         * Flag to use the UserAgent of the device when making API requests. This functionality is currently untested.
+         * Flag to use the UserAgent of the device when making API requests. This functionality is currently untested,
+         * use `false` when in production.
          */
-        internal val deviceUA: Boolean = false,
+        @Experimental
+        val deviceUA: Boolean = false,
         internal val deviceDPI: String = Crypto.DPI,
         internal val deviceResolution: String = Crypto.DISPLAY_RESOLUTION,
         /**

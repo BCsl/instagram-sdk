@@ -1,8 +1,6 @@
 package io.karn.instagram.core
 
 import io.karn.instagram.Instagram
-import khttp.structures.cookie.Cookie
-import khttp.structures.cookie.CookieJar
 import org.json.JSONObject
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -19,7 +17,7 @@ internal object Crypto {
     private const val APP_VERSION = "42.0.0.19.95"
 
     private const val DEVICE_MANUFACTURER: String = "samsung"
-    private const val DEVICE_NAME: String = "herolte"
+    private const val DEVICE_DEVICE: String = "herolte"
     private const val DEVICE_MODEL: String = "SM-G930F"
     internal const val DPI: String = "640dpi"
     internal const val DISPLAY_RESOLUTION: String = "1440x2560"
@@ -28,7 +26,7 @@ internal object Crypto {
     private const val CHIPSET: String = "samsungexynos8890"
     private const val VERSION_CODE: String = "104766893"
 
-    private const val USER_AGENT = "Instagram $APP_VERSION Android ($DEVICE_ANDROID_VERSION/$DEVICE_ANDROID_RELEASE; $DPI; $DISPLAY_RESOLUTION; $DEVICE_MANUFACTURER; $DEVICE_NAME; $DEVICE_MODEL; $CHIPSET; en_US; $VERSION_CODE)"
+    private const val USER_AGENT = "Instagram $APP_VERSION Android ($DEVICE_ANDROID_VERSION/$DEVICE_ANDROID_RELEASE; $DPI; $DISPLAY_RESOLUTION; $DEVICE_MANUFACTURER; $DEVICE_DEVICE; $DEVICE_MODEL; $CHIPSET; en_US; $VERSION_CODE)"
 
     val HEADERS: HashMap<String, String> = hashMapOf(
             "Accept-Encoding" to "gzip, deflate",
@@ -40,20 +38,20 @@ internal object Crypto {
             "User-Agent" to buildUserAgent()
     )
 
-    fun buildUserAgent(manufacturer: String = android.os.Build.MANUFACTURER,
-                       name: String = android.os.Build.BRAND,
-                       model: String = android.os.Build.MODEL,
-                       androidVersion: Int = android.os.Build.VERSION.SDK_INT,
+    fun buildUserAgent(androidVersion: Int = android.os.Build.VERSION.SDK_INT,
                        androidRelease: String = android.os.Build.VERSION.RELEASE,
-                       chipset: String = android.os.Build.BOARD,
                        dpi: String = Instagram.getInstance().configuration.deviceDPI,
-                       resolution: String = Instagram.getInstance().configuration.deviceResolution): String {
+                       resolution: String = Instagram.getInstance().configuration.deviceResolution,
+                       manufacturer: String = android.os.Build.MANUFACTURER,
+                       device: String = android.os.Build.DEVICE,
+                       model: String = android.os.Build.MODEL,
+                       chipset: String = android.os.Build.BOARD): String {
 
         if (!Instagram.getInstance().configuration.deviceUA) {
             return USER_AGENT
         }
 
-        return "Instagram $APP_VERSION Android ($androidVersion/$androidRelease; $dpi; $resolution; $manufacturer; $name; $model; $chipset; en_US; $VERSION_CODE)"
+        return "Instagram $APP_VERSION Android ($androidVersion/$androidRelease; $dpi; $resolution; $manufacturer; $device; $model; $chipset; en_US; $VERSION_CODE)"
     }
 
     fun generateUUID(dash: Boolean): String {

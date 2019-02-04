@@ -23,3 +23,9 @@ internal fun <T> wrapAPIException(block: () -> T): T {
         throw InstagramAPIException(408, "Unable to connect to host.", unknownHostException)
     }
 }
+
+/**
+ * Indicates the feature is in experimental state: its existence, signature or behavior
+ * might change without warning from one release to the next.
+ */
+annotation class Experimental
