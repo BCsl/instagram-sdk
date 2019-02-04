@@ -23,10 +23,10 @@ internal object Crypto {
     internal const val DISPLAY_RESOLUTION: String = "1440x2560"
     private const val DEVICE_ANDROID_VERSION: String = "24"
     private const val DEVICE_ANDROID_RELEASE: String = "7.0"
-    private const val CHIPSET: String = "samsungexynos8890"
+    private const val HARDWARE: String = "samsungexynos8890"
     private const val VERSION_CODE: String = "104766893"
 
-    private const val USER_AGENT = "Instagram $APP_VERSION Android ($DEVICE_ANDROID_VERSION/$DEVICE_ANDROID_RELEASE; $DPI; $DISPLAY_RESOLUTION; $DEVICE_MANUFACTURER; $DEVICE_DEVICE; $DEVICE_MODEL; $CHIPSET; en_US; $VERSION_CODE)"
+    private const val USER_AGENT = "Instagram $APP_VERSION Android ($DEVICE_ANDROID_VERSION/$DEVICE_ANDROID_RELEASE; $DPI; $DISPLAY_RESOLUTION; $DEVICE_MANUFACTURER; $DEVICE_DEVICE; $DEVICE_MODEL; $HARDWARE; en_US; $VERSION_CODE)"
 
     val HEADERS: HashMap<String, String> = hashMapOf(
             "Accept-Encoding" to "gzip, deflate",
@@ -45,13 +45,13 @@ internal object Crypto {
                        manufacturer: String = android.os.Build.MANUFACTURER,
                        device: String = android.os.Build.DEVICE,
                        model: String = android.os.Build.MODEL,
-                       chipset: String = android.os.Build.BOARD): String {
+                       hardware: String = android.os.Build.HARDWARE): String {
 
         if (!Instagram.getInstance().configuration.deviceUA) {
             return USER_AGENT
         }
 
-        return "Instagram $APP_VERSION Android ($androidVersion/$androidRelease; $dpi; $resolution; $manufacturer; $device; $model; $chipset; en_US; $VERSION_CODE)"
+        return "Instagram $APP_VERSION Android ($androidVersion/$androidRelease; $dpi; $resolution; $manufacturer; $device; $model; $hardware; en_US; $VERSION_CODE)"
     }
 
     fun generateUUID(dash: Boolean): String {
