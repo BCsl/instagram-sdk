@@ -3,8 +3,8 @@ package io.karn.instagram.endpoints
 import io.karn.instagram.Instagram
 import io.karn.instagram.api.StoriesAPI
 import io.karn.instagram.common.Errors
-import io.karn.instagram.core.SyntheticResponse
 import io.karn.instagram.common.wrapAPIException
+import io.karn.instagram.core.SyntheticResponse
 import org.json.JSONArray
 
 class Stories internal constructor() {
@@ -16,7 +16,9 @@ class Stories internal constructor() {
      * @return  A {@link SyntheticResponse.StoryReel} object.
      */
     fun getStories(userKey: String): SyntheticResponse.StoryReel {
-        val res = wrapAPIException { StoriesAPI.getStories(userKey, Instagram.session) }
+        val (res, error) = wrapAPIException { StoriesAPI.getStories(userKey, Instagram.session) }
+
+        res ?: return SyntheticResponse.StoryReel.Failure(error!!.message ?: Errors.ERROR_UNKNOWN)
 
         return when (res.statusCode) {
             200 -> {

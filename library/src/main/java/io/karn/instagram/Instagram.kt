@@ -26,10 +26,14 @@ class Instagram private constructor(val configuration: Configuration) {
          * Initialize the Instagram SDK with the provided configuration. This function must be executed before other
          * parts of the library are interacted with.
          */
-        fun init(configuration: Configuration = Configuration()) {
+        fun init(configure: (Configuration.() -> Unit) = { Configuration() }) {
             if (instance != null) return
 
-            instance = Instagram(configuration)
+            val config = Configuration()
+
+            config.configure()
+
+            instance = Instagram(config)
         }
 
         fun getInstance(): Instagram {

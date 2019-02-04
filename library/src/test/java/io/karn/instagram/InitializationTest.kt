@@ -5,7 +5,9 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
 class InitializationTest : TestBase() {
@@ -25,6 +27,9 @@ class InitializationTest : TestBase() {
         assertNotNull(Instagram.getInstance().account)
         assertNotNull(Instagram.getInstance().search)
         assertNotNull(Instagram.getInstance().stories)
+
+        assertFalse(Instagram.getInstance().configuration.deviceUA)
+        assertNull(Instagram.getInstance().configuration.requestLogger)
     }
 
     @Test

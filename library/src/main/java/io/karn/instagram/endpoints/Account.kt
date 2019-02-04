@@ -2,10 +2,9 @@ package io.karn.instagram.endpoints
 
 import io.karn.instagram.Instagram
 import io.karn.instagram.api.AccountAPI
-import io.karn.instagram.common.Errors
+import io.karn.instagram.common.wrapAPIException
 import io.karn.instagram.core.Endpoints
 import io.karn.instagram.core.SyntheticResponse
-import io.karn.instagram.common.wrapAPIException
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -18,12 +17,14 @@ class Account internal constructor() {
      * @return  A {@link SyntheticResponse.AccountDetails} object.
      */
     fun getAccount(userKey: String): SyntheticResponse.AccountDetails {
-        val res = wrapAPIException { AccountAPI.accountInfo(userKey, Instagram.session) }
+        val (res, error) = wrapAPIException { AccountAPI.accountInfo(userKey, Instagram.session) }
+
+        res ?: return SyntheticResponse.AccountDetails.Failure(error!!.statusCode, error.statusMessage)
 
         // Handle error messages.
         return when (res.statusCode) {
             200 -> SyntheticResponse.AccountDetails.Success(res.jsonObject.optJSONObject("user") ?: JSONObject())
-            else -> SyntheticResponse.AccountDetails.Failure(String.format(Errors.ERROR_ACCOUNT_FETCH, res.statusCode, res.text))
+            else -> SyntheticResponse.AccountDetails.Failure(res.statusCode, res.text)
         }
     }
 
@@ -36,11 +37,13 @@ class Account internal constructor() {
      * @return  A {@link SyntheticResponse.ProfileFeed} object.
      */
     fun getFeed(userKey: String, maxId: String = "", minTimestamp: String = ""): SyntheticResponse.ProfileFeed {
-        val res = wrapAPIException { AccountAPI.feed(userKey, maxId, minTimestamp, Instagram.session) }
+        val (res, error) = wrapAPIException { AccountAPI.feed(userKey, maxId, minTimestamp, Instagram.session) }
+
+        res ?: return SyntheticResponse.ProfileFeed.Failure(error!!.statusCode, error.statusMessage)
 
         return when (res.statusCode) {
             200 -> SyntheticResponse.ProfileFeed.Success(res.jsonObject.optJSONArray("items") ?: JSONArray())
-            else -> SyntheticResponse.ProfileFeed.Failure(String.format(Errors.ERROR_FEED_FETCH, res.statusCode, res.text))
+            else -> SyntheticResponse.ProfileFeed.Failure(res.statusCode, res.text)
         }
     }
 
@@ -65,8 +68,9 @@ class Account internal constructor() {
             getRelationship(Endpoints.FOLLOWING, userKey, maxId)
 
     private fun getRelationship(endpoint: String, primaryKey: String, maxId: String): SyntheticResponse.Relationships {
-        val res = wrapAPIException { AccountAPI.relationship(endpoint, primaryKey, maxId, Instagram.session) }
+        val (res, error) = wrapAPIException { AccountAPI.relationship(endpoint, primaryKey, maxId, Instagram.session) }
 
+        res ?: return SyntheticResponse.Relationships.Failure(error!!.statusCode, error.statusMessage)
 
         return when (res.statusCode) {
             200 -> {
@@ -75,7 +79,7 @@ class Account internal constructor() {
 
                 SyntheticResponse.Relationships.Success(nextMaxId, jsonData)
             }
-            else -> SyntheticResponse.Relationships.Failure("Status Code: ${res.statusCode}, Message: ${res.text}.")
+            else -> SyntheticResponse.Relationships.Failure(res.statusCode, res.text)
         }
     }
 }

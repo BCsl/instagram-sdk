@@ -12,11 +12,7 @@ import org.json.JSONObject
  *
  * This exception may also wrap a different exception.
  */
-class InstagramAPIException : Exception {
-
-    internal constructor(statusCode: Int, message: String) : super(buildMessage(statusCode, message))
-
-    internal constructor(statusCode: Int, message: String, cause: Throwable) : super(buildMessage(statusCode, message), cause)
+class InstagramAPIException internal constructor(val statusCode: Int, val statusMessage: String, override val cause: Throwable?) : Exception(buildMessage(statusCode, statusMessage), cause) {
 
     companion object {
         private fun buildMessage(statusCode: Int, message: String) =
