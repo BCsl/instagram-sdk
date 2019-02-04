@@ -13,11 +13,11 @@ data class Configuration(
          * use `false` when in production.
          */
         @Experimental
-        val deviceUA: Boolean = false,
+        var deviceUA: Boolean = false,
         @Experimental
-        val deviceDPI: String = Crypto.DPI,
+        var deviceDPI: String = Crypto.DPI,
         @Experimental
-        val deviceResolution: String = Crypto.DISPLAY_RESOLUTION,
+        var deviceResolution: String = Crypto.DISPLAY_RESOLUTION,
         /**
          * Attach a logger to process API calls.
          *
@@ -26,7 +26,7 @@ data class Configuration(
          * @param statusCode    The resulting status code -- e.g 200
          * @param userAgent     The user-agent provided for the HTTP request.
          */
-        val requestLogger: ((requestMethod: String, url: String, statusCode: Int, userAgent: String) -> Unit)? = null
+        var requestLogger: ((requestMethod: String, url: String, statusCode: Int, userAgent: String) -> Unit)? = null
 ) {
     init {
         deviceDPI.takeIf { !it.isBlank() }

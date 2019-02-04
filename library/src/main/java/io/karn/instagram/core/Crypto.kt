@@ -40,15 +40,15 @@ internal object Crypto {
 
     fun buildUserAgent(androidVersion: Int = android.os.Build.VERSION.SDK_INT,
                        androidRelease: String = android.os.Build.VERSION.RELEASE,
-                       dpi: String = Instagram.getInstance().configuration.deviceDPI,
-                       resolution: String = Instagram.getInstance().configuration.deviceResolution,
+                       dpi: String = Instagram.config.deviceDPI,
+                       resolution: String = Instagram.config.deviceResolution,
                        manufacturer: String = android.os.Build.MANUFACTURER,
                        brand: String = android.os.Build.BRAND.takeIf { !it.isNullOrBlank() }?.let { "/$it" } ?: "",
                        device: String = android.os.Build.DEVICE,
                        model: String = android.os.Build.MODEL,
                        hardware: String = android.os.Build.HARDWARE): String {
 
-        if (!Instagram.getInstance().configuration.deviceUA) {
+        if (!Instagram.config.deviceUA) {
             return USER_AGENT
         }
 

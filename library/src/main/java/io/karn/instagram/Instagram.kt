@@ -15,7 +15,7 @@ import khttp.KHttpConfig
  * Note the the SDK itself is synchronous and allows the developer the flexibility to implement their
  * preferred async pattern.
  */
-class Instagram private constructor(val configuration: Configuration) {
+class Instagram private constructor(private val configuration: Configuration) {
 
     companion object {
         private val NOT_INITIALIZED_ERROR = IllegalStateException("Call `Instagram.init(...)` before calling this method.")
@@ -26,7 +26,7 @@ class Instagram private constructor(val configuration: Configuration) {
          * Initialize the Instagram SDK with the provided configuration. This function must be executed before other
          * parts of the library are interacted with.
          */
-        fun init(configure: (Configuration.() -> Unit) = { Configuration() }) {
+        fun init(configure: (Configuration.() -> Unit) = {}) {
             if (instance != null) return
 
             val config = Configuration()
@@ -41,12 +41,15 @@ class Instagram private constructor(val configuration: Configuration) {
         }
 
         var session: Session
-            get() {
-                return instance?._session ?: throw NOT_INITIALIZED_ERROR
-            }
+            get() = instance?._session ?: throw NOT_INITIALIZED_ERROR
             set(value) {
                 instance?._session = value
             }
+
+        val config: Configuration
+            // Return a copy to prevent accidental mutation.
+            // TODO: Switch to a different pattern for creating the config.
+            get() = instance?.configuration?.copy() ?: throw NOT_INITIALIZED_ERROR
     }
 
     private var _session: Session = Session()
