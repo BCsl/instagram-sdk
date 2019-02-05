@@ -5,8 +5,7 @@ import org.json.JSONObject
 import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.security.MessageDigest
-import java.util.HashMap
-import java.util.UUID
+import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -14,19 +13,12 @@ internal object Crypto {
     private const val SIG_KEY = "673581b0ddb792bf47da5f9ca816b613d7996f342723aa06993a3f0552311c7d"
     const val SIG_VERSION = "4"
 
-    private const val APP_VERSION = "42.0.0.19.95"
-
-    private const val DEVICE_MANUFACTURER: String = "samsung"
-    private const val DEVICE_DEVICE: String = "herolte"
-    private const val DEVICE_MODEL: String = "SM-G930F"
     internal const val DPI: String = "640dpi"
     internal const val DISPLAY_RESOLUTION: String = "1440x2560"
-    private const val DEVICE_ANDROID_VERSION: String = "24"
-    private const val DEVICE_ANDROID_RELEASE: String = "7.0"
-    private const val HARDWARE: String = "samsungexynos8890"
+
+    private const val APP_VERSION = "42.0.0.19.95"
     private const val VERSION_CODE: String = "104766893"
 
-    internal const val USER_AGENT = "Instagram $APP_VERSION Android ($DEVICE_ANDROID_VERSION/$DEVICE_ANDROID_RELEASE; $DPI; $DISPLAY_RESOLUTION; $DEVICE_MANUFACTURER; $DEVICE_MODEL; $DEVICE_DEVICE; $HARDWARE; en_US; $VERSION_CODE)"
 
     val HEADERS: HashMap<String, String> = hashMapOf(
             "Accept-Encoding" to "gzip, deflate",
@@ -38,6 +30,23 @@ internal object Crypto {
             "User-Agent" to buildUserAgent()
     )
 
+    /**
+     * Function to build the UserAgent which is used with the API to manage user authentication. This User Agent must be
+     * correct otherwise the authentication step will fail.
+     *
+     * The User Agent's defaults are set below in the event that this function is exposed in the future. The parameters
+     * that are known to work are as follows.
+     *
+     *  androidVersion = "24"
+     *  androidRelease = "7.0"
+     *  dpi = "640dpi"
+     *  resolution = "1440x2560"
+     *  manufacturer = "samsung"
+     *  brand = ""
+     *  device = "herolte"
+     *  model = "SM-G930F"
+     *  hardware = "samsungexynos8890"
+     */
     fun buildUserAgent(androidVersion: Int = android.os.Build.VERSION.SDK_INT,
                        androidRelease: String = android.os.Build.VERSION.RELEASE,
                        dpi: String = Instagram.config.deviceDPI,
@@ -47,10 +56,6 @@ internal object Crypto {
                        device: String = android.os.Build.DEVICE,
                        model: String = android.os.Build.MODEL,
                        hardware: String = android.os.Build.HARDWARE): String {
-
-        if (!Instagram.config.deviceUA) {
-            return USER_AGENT
-        }
 
         return "Instagram $APP_VERSION Android ($androidVersion/$androidRelease; $dpi; $resolution; $manufacturer$brand; $device; $model; $hardware; en_US; $VERSION_CODE)"
     }

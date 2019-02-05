@@ -6,8 +6,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class InitializationTest : TestBase() {
@@ -18,8 +16,8 @@ class InitializationTest : TestBase() {
     @Before
     fun beforeTest() {
         // Initialize the library
-        Instagram.init {
-            deviceUA = true
+        Instagram.init(applicationContext) {
+            requestLogger = { method, url, statusCode, userAgent -> }
         }
     }
 
@@ -30,12 +28,8 @@ class InitializationTest : TestBase() {
         assertNotNull(Instagram.getInstance().search)
         assertNotNull(Instagram.getInstance().stories)
 
-        assertTrue(Instagram.config.deviceUA)
-
-        Instagram.config.deviceUA = false
-
-        assertTrue(Instagram.config.deviceUA)
-        assertNull(Instagram.config.requestLogger)
+        // Validate configuration
+        assertNotNull(Instagram.config.requestLogger)
     }
 
     @Test

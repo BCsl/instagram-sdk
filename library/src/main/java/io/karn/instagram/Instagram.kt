@@ -1,5 +1,6 @@
 package io.karn.instagram
 
+import android.content.Context
 import io.karn.instagram.core.Configuration
 import io.karn.instagram.core.Session
 import io.karn.instagram.endpoints.Account
@@ -26,13 +27,20 @@ class Instagram private constructor(private val configuration: Configuration) {
          * Initialize the Instagram SDK with the provided configuration. This function must be executed before other
          * parts of the library are interacted with.
          */
-        fun init(configure: (Configuration.() -> Unit) = {}) {
+        fun init(context: Context, configure: (Configuration.() -> Unit) = {}) {
             if (instance != null) return
 
-            val config = Configuration()
+            // Initialize the Configuration.
+            val displayMetrics = context.resources.displayMetrics
+            val config = Configuration(
+                    deviceDPI = "${displayMetrics.densityDpi}dpi",
+                    deviceResolution = "${displayMetrics.widthPixels}x${displayMetrics.heightPixels}"
+            )
 
+            // Apply any changes.
             config.configure()
 
+            // Build instance.
             instance = Instagram(config)
         }
 
@@ -46,10 +54,9 @@ class Instagram private constructor(private val configuration: Configuration) {
                 instance?._session = value
             }
 
-        val config: Configuration
+        internal val config: Configuration
             // Return a copy to prevent accidental mutation.
-            // TODO: Switch to a different pattern for creating the config.
-            get() = instance?.configuration?.copy() ?: throw NOT_INITIALIZED_ERROR
+            get() = instance?.configuration ?: throw NOT_INITIALIZED_ERROR
     }
 
     private var _session: Session = Session()

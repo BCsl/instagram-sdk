@@ -34,8 +34,9 @@ dependencies {
 The most basic case is as follows:
 
 ```Kotlin
-// Initialize the SDK -- do this before attempting to use the rest of the SDK functions.
-Instagram.init()
+// Initialize the SDK -- do this before attempting to use the rest of the SDK functions. Use the application context
+// and not a wrapper to ensure that the displayMetrics object is available.
+Instagram.init(context)
 
 // Attempt to sign-in to an account.
 Instagram.getInstance().authentication.authenticate("username", "password")
