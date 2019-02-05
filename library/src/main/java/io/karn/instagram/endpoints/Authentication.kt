@@ -7,6 +7,7 @@ import io.karn.instagram.common.wrapAPIException
 import io.karn.instagram.core.CookieUtils
 import io.karn.instagram.core.Crypto
 import io.karn.instagram.core.SyntheticResponse
+import khttp.responses.Response
 import org.json.JSONObject
 
 /**
@@ -71,13 +72,7 @@ class Authentication internal constructor() {
         res ?: return SyntheticResponse.TwoFactorResult.Failure(error!!.statusCode, error.statusMessage)
 
         return when (res.statusCode) {
-            200 -> {
-                val auth = res.jsonObject
-                auth.put("cookie", CookieUtils.serializeToJson(res.cookies))
-                auth.put("uuid", Instagram.session.uuid)
-
-                SyntheticResponse.TwoFactorResult.Success(auth)
-            }
+            200 -> SyntheticResponse.TwoFactorResult.Success(buildSuccess(res))
             else -> SyntheticResponse.TwoFactorResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
         }
     }
@@ -161,16 +156,7 @@ class Authentication internal constructor() {
         res ?: return SyntheticResponse.Auth.Failure(error!!.statusCode, error.statusMessage)
 
         return when (res.statusCode) {
-            200 -> {
-                Instagram.session.cookieJar = res.cookies
-
-                val auth = res.jsonObject
-
-                auth.put("cookie", CookieUtils.serializeToJson(res.cookies))
-                auth.put("uuid", Instagram.session.uuid)
-
-                SyntheticResponse.Auth.Success(auth)
-            }
+            200 -> SyntheticResponse.Auth.Success(buildSuccess(res))
             400 -> {
                 Instagram.session.cookieJar = res.cookies
 
@@ -190,5 +176,17 @@ class Authentication internal constructor() {
             }
             else -> SyntheticResponse.Auth.Failure(res.statusCode, res.text)
         }
+    }
+
+    private fun buildSuccess(res: Response): JSONObject {
+        Instagram.session.primaryKey = res.jsonObject.optJSONObject("logged_in_user").getString("pk")
+        Instagram.session.cookieJar = res.cookies
+
+        val auth = res.jsonObject
+        auth.put("primaryKey", Instagram.session.primaryKey)
+        auth.put("cookie", CookieUtils.serializeToJson(res.cookies))
+        auth.put("uuid", Instagram.session.uuid)
+
+        return auth
     }
 }
