@@ -5,6 +5,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -30,8 +31,6 @@ class AccountTest : TestBase() {
         // Authenticate the user.
         val res = Instagram.getInstance().authentication.authenticate(username, password)
 
-        System.out.println(res)
-
         assertTrue(res is SyntheticResponse.Auth.Success)
 
         assertNotNull(res.data.optJSONObject("logged_in_user"))
@@ -45,8 +44,16 @@ class AccountTest : TestBase() {
     fun account_validateSignedInUserInformation() {
         val res = Instagram.getInstance().account.getAccount(Instagram.session.primaryKey)
 
+        assertTrue(res is SyntheticResponse.AccountDetails.Success)
+    }
+
+    @Test
+    fun account_validateSingedInUserFeed() {
+        val res = Instagram.getInstance().account.getFeed(Instagram.session.primaryKey)
+
         System.out.println(res)
 
-        assertTrue(res is SyntheticResponse.AccountDetails.Success)
+        assertTrue(res is SyntheticResponse.ProfileFeed.Success)
+        assertEquals(0, res.feed.length())
     }
 }

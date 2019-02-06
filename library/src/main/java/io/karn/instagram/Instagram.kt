@@ -21,7 +21,7 @@ class Instagram private constructor(private val configuration: Configuration) {
     companion object {
         private val NOT_INITIALIZED_ERROR = IllegalStateException("Call `Instagram.init(...)` before calling this method.")
 
-        private var instance: Instagram? = null
+        internal var instance: Instagram? = null
 
         /**
          * Initialize the Instagram SDK with the provided configuration. This function must be executed before other
