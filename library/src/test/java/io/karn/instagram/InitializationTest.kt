@@ -19,11 +19,11 @@ class InitializationTest {
         }
 
         assertFails {
-            Instagram.session
+            Instagram.config
         }
 
         assertFails {
-            Instagram.config
+            Instagram.session
         }
 
         // Initialize the library
@@ -31,6 +31,8 @@ class InitializationTest {
             requestLogger = { method, url, statusCode, userAgent -> }
         }
 
+        assertNotNull(Instagram.config)
+        assertNotNull(Instagram.session)
         assertNotNull(Instagram.getInstance().authentication)
         assertNotNull(Instagram.getInstance().account)
         assertNotNull(Instagram.getInstance().search)
