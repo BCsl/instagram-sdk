@@ -70,6 +70,7 @@ jacoco {
 
 tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
     //travis has some strict RAM restrictions, can't afford to exceed this
     maxHeapSize = "1024m"
     jvmArgs "-Xmx1024m"

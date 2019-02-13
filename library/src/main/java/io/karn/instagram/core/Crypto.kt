@@ -19,7 +19,6 @@ internal object Crypto {
     private const val APP_VERSION = "42.0.0.19.95"
     private const val VERSION_CODE: String = "104766893"
 
-
     val HEADERS: HashMap<String, String> = hashMapOf(
             "Accept-Encoding" to "gzip, deflate",
             "Connection" to "close",

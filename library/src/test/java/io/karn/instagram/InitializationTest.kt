@@ -3,11 +3,12 @@ package io.karn.instagram
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import kotlin.test.assertFails
 import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
-class InitializationTest : TestBase() {
+class InitializationTest {
 
     @Test
     fun startUp_validateInitialization() {
@@ -26,7 +27,7 @@ class InitializationTest : TestBase() {
         }
 
         // Initialize the library
-        Instagram.init(applicationContext) {
+        Instagram.init(RuntimeEnvironment.application) {
             requestLogger = { method, url, statusCode, userAgent -> }
         }
 
