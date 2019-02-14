@@ -16,4 +16,7 @@ internal object Endpoints {
     const val SEARCH = "$API_URL/users/search/?ig_sig_key_version=${Crypto.SIG_VERSION}&rank_token=%s&is_typeahead=false&query=%s"
 
     const val STORIES = "$API_URL/feed/user/%s/story/"
+
+    const val MEDIA_LIKES = "$API_URL/media/%s/likers/"
+    const val MEDIA_COMMENTS = "$API_URL/media/%s/comments/"
 }

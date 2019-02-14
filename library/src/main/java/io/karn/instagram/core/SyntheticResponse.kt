@@ -75,6 +75,18 @@ sealed class SyntheticResponse {
         data class Failure(val statusCode: Int, val message: String) : ProfileFeed()
     }
 
+    sealed class MediaLikes : SyntheticResponse() {
+        data class Success(val likes: JSONArray) : MediaLikes()
+
+        data class Failure(val statusCode: Int, val message: String) : MediaLikes()
+    }
+
+    sealed class MediaComments : SyntheticResponse() {
+        data class Success(val comments: JSONArray) : MediaComments()
+
+        data class Failure(val statusCode: Int, val message: String) : MediaComments()
+    }
+
     sealed class Logout : SyntheticResponse() {
         data class Success(val statusCode: Int) : Logout()
 
