@@ -16,7 +16,6 @@ subprojects {
         repositories {
             google()
             jcenter()
-            maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         }
 
         dependencies {
@@ -31,12 +30,6 @@ subprojects {
             // Library documentation
             classpath config.build.gradle.dokka
         }
-    }
-
-    repositories {
-        google()
-        jcenter()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     }
 }
 

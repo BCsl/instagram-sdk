@@ -87,6 +87,12 @@ sealed class SyntheticResponse {
         data class Failure(val statusCode: Int, val message: String) : MediaComments()
     }
 
+    sealed class DirectMessages : SyntheticResponse() {
+        data class Success(val unseenCount: Int, val threads: JSONArray) : DirectMessages()
+
+        data class Failure(val statusCode: Int, val message: String) : DirectMessages()
+    }
+
     sealed class Logout : SyntheticResponse() {
         data class Success(val statusCode: Int) : Logout()
 

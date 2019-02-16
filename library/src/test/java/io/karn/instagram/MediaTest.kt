@@ -7,7 +7,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class MediaTest : SignedInTestBase() {
+class MediaTest : TestBase() {
 
     val mediaKey = "1846492913375143728"
 

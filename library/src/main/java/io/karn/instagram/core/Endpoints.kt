@@ -19,4 +19,8 @@ internal object Endpoints {
 
     const val MEDIA_LIKES = "$API_URL/media/%s/likers/"
     const val MEDIA_COMMENTS = "$API_URL/media/%s/comments/"
+
+    const val DIRECT_MESSAGES = "$API_URL/direct_v2/inbox/?persistentBadging=true&use_unified_inbox=true"
+
+    const val COLLECTIONS_LIST = "$API_URL/collections/list/"
 }

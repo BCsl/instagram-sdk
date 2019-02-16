@@ -22,8 +22,8 @@ class Stories internal constructor() {
         return when (res.statusCode) {
             200 -> {
                 val reel = res.jsonObject.optJSONObject("reel")
-                        ?.optJSONArray("items")
-                        ?: JSONArray()
+                    ?.optJSONArray("items")
+                    ?: JSONArray()
 
                 SyntheticResponse.StoryReel.Success(reel)
             }

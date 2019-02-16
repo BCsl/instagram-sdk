@@ -16,9 +16,9 @@ class InstagramAPIException internal constructor(val statusCode: Int, val status
 
     companion object {
         private fun buildMessage(statusCode: Int, message: String) =
-                JSONObject().also {
-                    it.put("status_code", statusCode)
-                    it.put("message", message)
-                }.toString()
+            JSONObject().also {
+                it.put("status_code", statusCode)
+                it.put("message", message)
+            }.toString()
     }
 }

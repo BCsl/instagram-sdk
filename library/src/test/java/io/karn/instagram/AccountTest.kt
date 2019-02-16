@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class AccountTest : SignedInTestBase() {
+class AccountTest : TestBase() {
 
     @Test
     fun validateSignedInUserInformation() {

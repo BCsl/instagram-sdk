@@ -7,7 +7,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class StoriesTest : SignedInTestBase() {
+class StoriesTest : TestBase() {
 
     @Test
     fun validateStories() {
