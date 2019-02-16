@@ -30,8 +30,8 @@ class Instagram private constructor(private val configuration: Configuration) {
             // Initialize the Configuration.
             val displayMetrics = context.resources.displayMetrics
             val config = Configuration(
-                deviceDPI = "${displayMetrics.densityDpi}dpi",
-                deviceResolution = "${displayMetrics.widthPixels}x${displayMetrics.heightPixels}"
+                    deviceDPI = "${displayMetrics.densityDpi}dpi",
+                    deviceResolution = "${displayMetrics.widthPixels}x${displayMetrics.heightPixels}"
             )
 
             // Apply any changes.
@@ -70,10 +70,10 @@ class Instagram private constructor(private val configuration: Configuration) {
         configuration.requestLogger?.let { logger ->
             KHttpConfig.attachInterceptor {
                 logger.invoke(
-                    it.request.method,
-                    it.request.url,
-                    it.statusCode,
-                    it.request.headers["User-Agent"] ?: ""
+                        it.request.method,
+                        it.request.url,
+                        it.statusCode,
+                        it.request.headers["User-Agent"] ?: ""
                 )
             }
         }

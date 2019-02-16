@@ -20,13 +20,13 @@ internal object Crypto {
     private const val VERSION_CODE: String = "104766893"
 
     val HEADERS: HashMap<String, String> = hashMapOf(
-        "Accept-Encoding" to "gzip, deflate",
-        "Connection" to "close",
-        "Accept" to "*/*",
-        "Content-Type" to "application/x-www-form-urlencoded; charset=UTF-8",
-        "Cookie2" to "\$Version=1",
-        "Accept-Language" to "en-US",
-        "User-Agent" to buildUserAgent()
+            "Accept-Encoding" to "gzip, deflate",
+            "Connection" to "close",
+            "Accept" to "*/*",
+            "Content-Type" to "application/x-www-form-urlencoded; charset=UTF-8",
+            "Cookie2" to "\$Version=1",
+            "Accept-Language" to "en-US",
+            "User-Agent" to buildUserAgent()
     )
 
     /**
@@ -70,25 +70,25 @@ internal object Crypto {
 
     fun generateLoginPayload(token: String, username: String, password: String, loginAttempts: Int, deviceId: String = generateDeviceId(username, password)): String {
         val data = JSONObject()
-            .put("phone_id", generateUUID(true))
-            .put("_csrftoken", token)
-            .put("username", username)
-            .put("guid", Instagram.session.uuid)
-            .put("device_id", deviceId)
-            .put("password", password)
-            .put("login_attempt_count", loginAttempts)
+                .put("phone_id", generateUUID(true))
+                .put("_csrftoken", token)
+                .put("username", username)
+                .put("guid", Instagram.session.uuid)
+                .put("device_id", deviceId)
+                .put("password", password)
+                .put("login_attempt_count", loginAttempts)
 
         return generateSignature(data.toString())
     }
 
     fun generateTwoFactorPayload(code: String, identifier: String, token: String, username: String, password: String, deviceId: String = generateDeviceId(username, password)): String {
         val data = JSONObject()
-            .put("verification_code", code)
-            .put("two_factor_identifier", identifier)
-            .put("_csrftoken", token)
-            .put("username", username)
-            .put("device_id", deviceId)
-            .put("password", password)
+                .put("verification_code", code)
+                .put("two_factor_identifier", identifier)
+                .put("_csrftoken", token)
+                .put("username", username)
+                .put("device_id", deviceId)
+                .put("password", password)
 
         return generateSignature(data.toString())
     }

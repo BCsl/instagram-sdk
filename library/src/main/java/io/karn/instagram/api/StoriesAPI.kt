@@ -8,7 +8,7 @@ import khttp.get
 internal object StoriesAPI {
 
     fun getStories(primaryKey: String, session: Session) =
-        get(url = String.format(Endpoints.STORIES, primaryKey),
-            headers = Crypto.HEADERS,
-            cookies = session.cookieJar)
+            get(url = String.format(Endpoints.STORIES, primaryKey),
+                    headers = Crypto.HEADERS,
+                    cookies = session.cookieJar)
 }

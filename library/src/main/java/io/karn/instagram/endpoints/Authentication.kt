@@ -56,7 +56,7 @@ class Authentication internal constructor() {
         return when (res.statusCode) {
             200 -> {
                 val newToken = AuthenticationAPI.parseCSRFToken(res).takeIf { !it.isNullOrBlank() || it != "null" }
-                    ?: return SyntheticResponse.Auth.TokenFailure(412, res.text)
+                        ?: return SyntheticResponse.Auth.TokenFailure(412, res.text)
 
                 processLogin(username, password, newToken)
             }
@@ -107,9 +107,9 @@ class Authentication internal constructor() {
 
                 when (res.jsonObject.optString("step_name")) {
                     "verify_code" -> SyntheticResponse.AuthMethodSelectionResult.PhoneSelectionSuccess(res.jsonObject.optJSONObject("step_data")
-                        ?: JSONObject())
+                            ?: JSONObject())
                     "verify_email" -> SyntheticResponse.AuthMethodSelectionResult.EmailSelectionSuccess(res.jsonObject.optJSONObject("step_data")
-                        ?: JSONObject())
+                            ?: JSONObject())
                     else -> SyntheticResponse.AuthMethodSelectionResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
                 }
             }
@@ -125,7 +125,7 @@ class Authentication internal constructor() {
         return when (res.statusCode) {
             200 -> {
                 val token = AuthenticationAPI.parseCSRFToken(res).takeIf { !it.isNullOrBlank() || it != "null" }
-                    ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                        ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
 
                 SyntheticResponse.ChallengeCodeSubmitResult.Success(token)
             }
@@ -164,8 +164,8 @@ class Authentication internal constructor() {
                     res.jsonObject.optBoolean("two_factor_required") -> {
                         // User requires two factor.
                         SyntheticResponse.Auth.TwoFactorRequired(res.jsonObject
-                            .put("token", token)
-                            .put("device_id", deviceId))
+                                .put("token", token)
+                                .put("device_id", deviceId))
                     }
                     res.jsonObject.has("challenge") -> {
                         // User needs to pass challenge

@@ -55,7 +55,7 @@ class Account internal constructor() {
      * @return  A {@link SyntheticResponse.Relationships} object.
      */
     fun getFollowers(userKey: String, maxId: String = ""): SyntheticResponse.Relationships =
-        getRelationship(Endpoints.FOLLOWERS, userKey, maxId)
+            getRelationship(Endpoints.FOLLOWERS, userKey, maxId)
 
     /**
      * Creates a SyntheticResponse from the response of a following relationship API request.
@@ -65,7 +65,7 @@ class Account internal constructor() {
      * @return  A {@link SyntheticResponse.Relationships} object.
      */
     fun getFollowing(userKey: String, maxId: String = ""): SyntheticResponse.Relationships =
-        getRelationship(Endpoints.FOLLOWING, userKey, maxId)
+            getRelationship(Endpoints.FOLLOWING, userKey, maxId)
 
     private fun getRelationship(endpoint: String, primaryKey: String, maxId: String): SyntheticResponse.Relationships {
         val (res, error) = wrapAPIException { AccountAPI.relationship(endpoint, primaryKey, maxId, Instagram.session) }

@@ -9,7 +9,7 @@ import khttp.get
 internal object DirectMessagesAPI {
 
     fun getMessages(maxID: String, session: Session) =
-        get(url = String.format(Endpoints.DIRECT_MESSAGES, maxID),
-            headers = Crypto.HEADERS,
-            cookies = session.cookieJar)
+            get(url = String.format(Endpoints.DIRECT_MESSAGES, maxID),
+                    headers = Crypto.HEADERS,
+                    cookies = session.cookieJar)
 }

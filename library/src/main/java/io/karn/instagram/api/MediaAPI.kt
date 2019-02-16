@@ -7,12 +7,12 @@ import khttp.get
 
 internal object MediaAPI {
     fun getLikes(mediaKey: String, session: Session) =
-        get(url = String.format(Endpoints.MEDIA_LIKES, mediaKey),
-            headers = Crypto.HEADERS,
-            cookies = session.cookieJar)
+            get(url = String.format(Endpoints.MEDIA_LIKES, mediaKey),
+                    headers = Crypto.HEADERS,
+                    cookies = session.cookieJar)
 
     fun getComments(mediaKey: String, session: Session) =
-        get(url = String.format(Endpoints.MEDIA_COMMENTS, mediaKey),
-            headers = Crypto.HEADERS,
-            cookies = session.cookieJar)
+            get(url = String.format(Endpoints.MEDIA_COMMENTS, mediaKey),
+                    headers = Crypto.HEADERS,
+                    cookies = session.cookieJar)
 }

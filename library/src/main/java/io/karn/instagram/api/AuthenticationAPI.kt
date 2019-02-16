@@ -12,41 +12,41 @@ internal object AuthenticationAPI {
 
     fun getTokenForAuth(): Response {
         return get(url = String.format(Endpoints.CSRF_TOKEN, Crypto.generateUUID(false)),
-            headers = Crypto.HEADERS,
-            allowRedirects = true)
+                headers = Crypto.HEADERS,
+                allowRedirects = true)
     }
 
     fun login(data: String): Response {
         return post(url = Endpoints.LOGIN,
-            headers = Crypto.HEADERS,
-            allowRedirects = true,
-            data = data)
+                headers = Crypto.HEADERS,
+                allowRedirects = true,
+                data = data)
     }
 
     fun twoFactor(data: String): Response {
         return post(url = Endpoints.LOGIN_APPROVAL,
-            headers = Crypto.HEADERS,
-            data = data)
+                headers = Crypto.HEADERS,
+                data = data)
     }
 
     fun prepareAuthChallenge(challengePath: String, session: Session): Response {
         return get(url = String.format(Endpoints.CHALLENGE_PATH, challengePath),
-            headers = Crypto.HEADERS,
-            cookies = session.cookieJar)
+                headers = Crypto.HEADERS,
+                cookies = session.cookieJar)
     }
 
     fun selectAuthChallengeMethod(challengePath: String, method: String, session: Session): Response {
         return post(url = String.format(Endpoints.CHALLENGE_PATH, challengePath),
-            headers = Crypto.HEADERS,
-            cookies = session.cookieJar,
-            data = hashMapOf("choice" to if (Authentication.AUTH_METHOD_PHONE == method) 0 else 1))
+                headers = Crypto.HEADERS,
+                cookies = session.cookieJar,
+                data = hashMapOf("choice" to if (Authentication.AUTH_METHOD_PHONE == method) 0 else 1))
     }
 
     fun submitAuthChallenge(challengePath: String, code: String, session: Session): Response {
         return post(url = String.format(Endpoints.CHALLENGE_PATH, challengePath),
-            headers = mapOf("User-Agent" to Crypto.buildUserAgent()),
-            cookies = session.cookieJar,
-            data = hashMapOf("security_code" to Integer.parseInt(code)))
+                headers = mapOf("User-Agent" to Crypto.buildUserAgent()),
+                cookies = session.cookieJar,
+                data = hashMapOf("security_code" to Integer.parseInt(code)))
     }
 
     fun logout(): Response {
