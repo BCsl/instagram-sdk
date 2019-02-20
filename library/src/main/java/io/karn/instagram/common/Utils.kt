@@ -1,9 +1,11 @@
 package io.karn.instagram.common
 
 import io.karn.instagram.exceptions.InstagramAPIException
+import org.json.JSONObject
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import java.util.*
 import javax.net.ssl.SSLException
 
 /**
@@ -24,6 +26,24 @@ internal fun <T> wrapAPIException(block: () -> T): Pair<T?, InstagramAPIExceptio
     }
 
     return Pair(null, error)
+}
+
+fun json(build: JsonObjectBuilder.() -> Unit): JSONObject {
+    return JsonObjectBuilder().json(build)
+}
+
+class JsonObjectBuilder {
+    private val deque: Deque<JSONObject> = ArrayDeque()
+
+    fun json(build: JsonObjectBuilder.() -> Unit): JSONObject {
+        deque.push(JSONObject())
+        this.build()
+        return deque.pop()
+    }
+
+    infix fun <T> String.to(value: T) {
+        deque.peek().put(this, value)
+    }
 }
 
 /**

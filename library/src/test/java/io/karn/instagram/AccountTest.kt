@@ -46,4 +46,12 @@ class AccountTest : TestBase() {
         assertTrue(res is SyntheticResponse.Relationships.Success)
         assertEquals(0, res.relationships.length())
     }
+
+    @Test
+    fun validateBlocked() {
+        val res = Instagram.getInstance().account.getBlocked()
+
+        assertTrue(res is SyntheticResponse.Blocks.Success)
+        assertEquals(1, res.profiles.length())
+    }
 }

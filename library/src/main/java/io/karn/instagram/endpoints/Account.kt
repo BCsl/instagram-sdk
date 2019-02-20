@@ -82,4 +82,22 @@ class Account internal constructor() {
             else -> SyntheticResponse.Relationships.Failure(res.statusCode, res.text)
         }
     }
+
+    /**
+     * Creates a SyntheticResponse from the response of a blocked user list API request.
+     *
+     * @return  A {@link SyntheticResponse.Blocks} object.
+     */
+    fun getBlocked(): SyntheticResponse.Blocks {
+        val (res, error) = wrapAPIException { AccountAPI.blockedAccounts(Instagram.session) }
+
+        res ?: return SyntheticResponse.Blocks.Failure(error!!.statusCode, error.statusMessage)
+
+        return when (res.statusCode) {
+            200 -> {
+                SyntheticResponse.Blocks.Success(res.jsonObject.optJSONArray("blocked_list") ?: JSONArray())
+            }
+            else -> SyntheticResponse.Blocks.Failure(res.statusCode, res.text)
+        }
+    }
 }

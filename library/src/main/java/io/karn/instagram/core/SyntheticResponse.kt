@@ -57,6 +57,12 @@ sealed class SyntheticResponse {
         data class Failure(val statusCode: Int, val message: String) : Relationships()
     }
 
+    sealed class Blocks : SyntheticResponse() {
+        data class Success(val profiles: JSONArray) : Blocks()
+
+        data class Failure(val statusCode: Int, val message: String) : Blocks()
+    }
+
     sealed class ProfileSearch : SyntheticResponse() {
         data class Success(val profiles: JSONArray) : ProfileSearch()
 

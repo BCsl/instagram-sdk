@@ -21,4 +21,9 @@ internal object AccountAPI {
             get(url = String.format(endpoint, userKey, "${session.primaryKey}_${session.uuid}", maxId),
                     headers = Crypto.HEADERS,
                     cookies = session.cookieJar)
+
+    fun blockedAccounts(session: Session) =
+            get(url = Endpoints.ACCOUNT_BLOCK_LIST,
+                    headers = Crypto.HEADERS,
+                    cookies = session.cookieJar)
 }
