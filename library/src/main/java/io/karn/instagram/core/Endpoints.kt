@@ -14,6 +14,8 @@ internal object Endpoints {
     const val ACCOUNT_FEED = "$API_URL/feed/user/%s/?max_id=%s&min_timestamp=%s&rank_token=%s&ranked_content=true"
     const val FOLLOWERS = "$API_URL/friendships/%s/followers/?ig_sig_key_version=${Crypto.SIG_VERSION}&rank_token=%s&max_id=%s"
     const val FOLLOWING = "$API_URL/friendships/%s/following/?ig_sig_key_version=${Crypto.SIG_VERSION}&rank_token=%s&max_id=%s"
+    const val FOLLOW = "$API_URL/friendships/create/%s/"
+    const val UNFOLLOW = "$API_URL/friendships/destroy/%s/"
 
     const val SEARCH = "$API_URL/users/search/?ig_sig_key_version=${Crypto.SIG_VERSION}&rank_token=%s&is_typeahead=false&query=%s"
 

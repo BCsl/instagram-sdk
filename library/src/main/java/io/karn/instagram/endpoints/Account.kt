@@ -42,7 +42,7 @@ class Account internal constructor() {
         res ?: return SyntheticResponse.ProfileFeed.Failure(error!!.statusCode, error.statusMessage)
 
         return when (res.statusCode) {
-            200 -> SyntheticResponse.ProfileFeed.Success(res.jsonObject.optJSONArray("items") ?: JSONArray())
+            200 -> SyntheticResponse.ProfileFeed.Success(res.jsonObject.optString("next_max_id", ""),res.jsonObject.optJSONArray("items") ?: JSONArray())
             else -> SyntheticResponse.ProfileFeed.Failure(res.statusCode, res.text)
         }
     }
@@ -68,7 +68,7 @@ class Account internal constructor() {
             getRelationship(Endpoints.FOLLOWING, userKey, maxId)
 
     private fun getRelationship(endpoint: String, primaryKey: String, maxId: String): SyntheticResponse.Relationships {
-        val (res, error) = wrapAPIException { AccountAPI.relationship(endpoint, primaryKey, maxId, Instagram.session) }
+        val (res, error) = wrapAPIException { AccountAPI.relationships(endpoint, primaryKey, maxId, Instagram.session) }
 
         res ?: return SyntheticResponse.Relationships.Failure(error!!.statusCode, error.statusMessage)
 
@@ -80,6 +80,33 @@ class Account internal constructor() {
                 SyntheticResponse.Relationships.Success(nextMaxId, jsonData)
             }
             else -> SyntheticResponse.Relationships.Failure(res.statusCode, res.text)
+        }
+    }
+
+    /**
+     * Creates a SyntheticResponse from the response of a user follow API request.
+     *
+     * @return  A {@link SyntheticResponse.RelationshipUpdate} object.
+     */
+    fun followProfile(userKey: String): SyntheticResponse.RelationshipUpdate =
+            updateRelationship(Endpoints.FOLLOW, userKey)
+
+    /**
+     * Creates a SyntheticResponse from the response of a user follow API request.
+     *
+     * @return  A {@link SyntheticResponse.RelationshipUpdate} object.
+     */
+    fun unfollowProfile(userKey: String): SyntheticResponse.RelationshipUpdate =
+            updateRelationship(Endpoints.UNFOLLOW, userKey)
+
+    private fun updateRelationship(endpoint: String, userKey: String): SyntheticResponse.RelationshipUpdate {
+        val (res, error) = wrapAPIException { AccountAPI.updateRelationship(endpoint, userKey, Instagram.session) }
+
+        res ?: return SyntheticResponse.RelationshipUpdate.Failure(error!!.statusCode, error.statusMessage)
+
+        return when (res.statusCode) {
+            200 -> SyntheticResponse.RelationshipUpdate.Success(res.jsonObject.optJSONObject("friendship_status") ?: JSONObject())
+            else -> SyntheticResponse.RelationshipUpdate.Failure(res.statusCode, res.text)
         }
     }
 

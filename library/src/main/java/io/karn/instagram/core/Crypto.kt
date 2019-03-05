@@ -93,6 +93,17 @@ internal object Crypto {
         return generateSignature(data.toString())
     }
 
+    fun generateAuthenticatedParams(session: Session, mutate: (JSONObject) -> Unit = {}): String {
+        val data = JSONObject()
+                .put("_uuid", session.uuid)
+                .put("_uid", session.primaryKey)
+                .put("_csrftoken", session.cookieJar.getCookie("csrftoken")?.value?.toString() ?: "")
+
+        mutate(data)
+
+        return generateSignature(data.toString())
+    }
+
     private fun digest(codec: String, source: String): String {
         val digest = MessageDigest.getInstance(codec)
         val digestBytes = digest.digest(source.toByteArray(Charset.forName("UTF-8")))

@@ -57,6 +57,12 @@ sealed class SyntheticResponse {
         data class Failure(val statusCode: Int, val message: String) : Relationships()
     }
 
+    sealed class RelationshipUpdate : SyntheticResponse() {
+        data class Success(val friendshipStatus: JSONObject) : RelationshipUpdate()
+
+        data class Failure(val statusCode: Int, val message: String) : RelationshipUpdate()
+    }
+
     sealed class Blocks : SyntheticResponse() {
         data class Success(val profiles: JSONArray) : Blocks()
 
@@ -76,7 +82,7 @@ sealed class SyntheticResponse {
     }
 
     sealed class ProfileFeed : SyntheticResponse() {
-        data class Success(val feed: JSONArray) : ProfileFeed()
+        data class Success(val nextMaxId: String, val feed: JSONArray) : ProfileFeed()
 
         data class Failure(val statusCode: Int, val message: String) : ProfileFeed()
     }

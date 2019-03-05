@@ -1,6 +1,5 @@
 package io.karn.instagram
 
-import android.app.Application
 import io.karn.instagram.core.SyntheticResponse
 import org.robolectric.RuntimeEnvironment
 import kotlin.test.assertNotEquals
@@ -9,8 +8,6 @@ import kotlin.test.assertTrue
 
 open class TestBase {
     companion object {
-        val applicationContext: Application = RuntimeEnvironment.application
-
         var intialized = false
     }
 
