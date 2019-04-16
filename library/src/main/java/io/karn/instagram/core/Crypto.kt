@@ -1,14 +1,11 @@
 package io.karn.instagram.core
 
 import io.karn.instagram.Instagram
-import khttp.structures.cookie.Cookie
-import khttp.structures.cookie.CookieJar
 import org.json.JSONObject
 import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.security.MessageDigest
-import java.util.HashMap
-import java.util.UUID
+import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -16,19 +13,11 @@ internal object Crypto {
     private const val SIG_KEY = "673581b0ddb792bf47da5f9ca816b613d7996f342723aa06993a3f0552311c7d"
     const val SIG_VERSION = "4"
 
-    private const val APP_VERSION = "42.0.0.19.95"
-
-    private const val DEVICE_MANUFACTURER: String = "samsung"
-    private const val DEVICE_NAME: String = "herolte"
-    private const val DEVICE_MODEL: String = "SM-G930F"
     internal const val DPI: String = "640dpi"
     internal const val DISPLAY_RESOLUTION: String = "1440x2560"
-    private const val DEVICE_ANDROID_VERSION: String = "24"
-    private const val DEVICE_ANDROID_RELEASE: String = "7.0"
-    private const val CHIPSET: String = "samsungexynos8890"
-    private const val VERSION_CODE: String = "104766893"
 
-    private const val USER_AGENT = "Instagram $APP_VERSION Android ($DEVICE_ANDROID_VERSION/$DEVICE_ANDROID_RELEASE; $DPI; $DISPLAY_RESOLUTION; $DEVICE_MANUFACTURER; $DEVICE_NAME; $DEVICE_MODEL; $CHIPSET; en_US; $VERSION_CODE)"
+    private const val APP_VERSION = "42.0.0.19.95"
+    private const val VERSION_CODE: String = "104766893"
 
     val HEADERS: HashMap<String, String> = hashMapOf(
             "Accept-Encoding" to "gzip, deflate",
@@ -40,20 +29,34 @@ internal object Crypto {
             "User-Agent" to buildUserAgent()
     )
 
-    fun buildUserAgent(manufacturer: String = android.os.Build.MANUFACTURER,
-                       name: String = android.os.Build.BRAND,
-                       model: String = android.os.Build.MODEL,
-                       androidVersion: Int = android.os.Build.VERSION.SDK_INT,
+    /**
+     * Function to build the UserAgent which is used with the API to manage user authentication. This User Agent must be
+     * correct otherwise the authentication step will fail.
+     *
+     * The User Agent's defaults are set below in the event that this function is exposed in the future. The parameters
+     * that are known to work are as follows.
+     *
+     *  androidVersion = "24"
+     *  androidRelease = "7.0"
+     *  dpi = "640dpi"
+     *  resolution = "1440x2560"
+     *  manufacturer = "samsung"
+     *  brand = ""
+     *  device = "herolte"
+     *  model = "SM-G930F"
+     *  hardware = "samsungexynos8890"
+     */
+    fun buildUserAgent(androidVersion: Int = android.os.Build.VERSION.SDK_INT,
                        androidRelease: String = android.os.Build.VERSION.RELEASE,
-                       chipset: String = android.os.Build.BOARD,
-                       dpi: String = Instagram.getInstance().configuration.deviceDPI,
-                       resolution: String = Instagram.getInstance().configuration.deviceResolution): String {
+                       dpi: String = Instagram.config.deviceDPI,
+                       resolution: String = Instagram.config.deviceResolution,
+                       manufacturer: String = android.os.Build.MANUFACTURER,
+                       brand: String = android.os.Build.BRAND.takeIf { !it.isNullOrBlank() }?.let { "/$it" } ?: "",
+                       device: String = android.os.Build.DEVICE,
+                       model: String = android.os.Build.MODEL,
+                       hardware: String = android.os.Build.HARDWARE): String {
 
-        if (!Instagram.getInstance().configuration.deviceUA) {
-            return USER_AGENT
-        }
-
-        return "Instagram $APP_VERSION Android ($androidVersion/$androidRelease; $dpi; $resolution; $manufacturer; $name; $model; $chipset; en_US; $VERSION_CODE)"
+        return "Instagram $APP_VERSION Android ($androidVersion/$androidRelease; $dpi; $resolution; $manufacturer$brand; $device; $model; $hardware; en_US; $VERSION_CODE)"
     }
 
     fun generateUUID(dash: Boolean): String {
@@ -86,6 +89,17 @@ internal object Crypto {
                 .put("username", username)
                 .put("device_id", deviceId)
                 .put("password", password)
+
+        return generateSignature(data.toString())
+    }
+
+    fun generateAuthenticatedParams(session: Session, mutate: (JSONObject) -> Unit = {}): String {
+        val data = JSONObject()
+                .put("_uuid", session.uuid)
+                .put("_uid", session.primaryKey)
+                .put("_csrftoken", session.cookieJar.getCookie("csrftoken")?.value?.toString() ?: "")
+
+        mutate(data)
 
         return generateSignature(data.toString())
     }

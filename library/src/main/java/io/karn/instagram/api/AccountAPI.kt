@@ -4,6 +4,7 @@ import io.karn.instagram.core.Crypto
 import io.karn.instagram.core.Endpoints
 import io.karn.instagram.core.Session
 import khttp.get
+import khttp.post
 
 internal object AccountAPI {
 
@@ -17,8 +18,21 @@ internal object AccountAPI {
                     headers = Crypto.HEADERS,
                     cookies = session.cookieJar)
 
-    fun relationship(endpoint: String, userKey: String, maxId: String, session: Session) =
+    fun relationships(endpoint: String, userKey: String, maxId: String, session: Session) =
             get(url = String.format(endpoint, userKey, "${session.primaryKey}_${session.uuid}", maxId),
+                    headers = Crypto.HEADERS,
+                    cookies = session.cookieJar)
+
+    fun updateRelationship(endpoint: String, userKey: String, session: Session) =
+            post(url = String.format(endpoint, userKey),
+                    headers = Crypto.HEADERS,
+                    data = Crypto.generateAuthenticatedParams(session) {
+                        it.put("user_id", userKey)
+                    },
+                    cookies = session.cookieJar)
+
+    fun blockedAccounts(session: Session) =
+            get(url = Endpoints.ACCOUNT_BLOCK_LIST,
                     headers = Crypto.HEADERS,
                     cookies = session.cookieJar)
 }

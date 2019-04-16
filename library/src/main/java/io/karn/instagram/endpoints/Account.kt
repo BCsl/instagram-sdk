@@ -2,9 +2,10 @@ package io.karn.instagram.endpoints
 
 import io.karn.instagram.Instagram
 import io.karn.instagram.api.AccountAPI
-import io.karn.instagram.common.Errors
+import io.karn.instagram.common.wrapAPIException
 import io.karn.instagram.core.Endpoints
 import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.exceptions.InstagramAPIException
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -16,15 +17,17 @@ class Account internal constructor() {
      * @param userKey    The Primary Key associated with the profile.
      * @return  A {@link SyntheticResponse.AccountDetails} object.
      */
-    fun getAccount(userKey: String): SyntheticResponse.AccountDetails =
-            AccountAPI.accountInfo(userKey, Instagram.session)
-                    .let {
-                        return@let when (it.statusCode) {
-                            200 -> SyntheticResponse.AccountDetails.Success(it.jsonObject.optJSONObject("user")
-                                    ?: JSONObject())
-                            else -> SyntheticResponse.AccountDetails.Failure(String.format(Errors.ERROR_ACCOUNT_FETCH, it.statusCode, it.text))
-                        }
-                    }
+    fun getAccount(userKey: String): SyntheticResponse.AccountDetails {
+        val (res, error) = wrapAPIException { AccountAPI.accountInfo(userKey, Instagram.session) }
+
+        res ?: return SyntheticResponse.AccountDetails.Failure(error!!)
+
+        // Handle error messages.
+        return when (res.statusCode) {
+            200 -> SyntheticResponse.AccountDetails.Success(res.jsonObject.optJSONObject("user") ?: JSONObject())
+            else -> SyntheticResponse.AccountDetails.Failure(InstagramAPIException(res.statusCode, res.text))
+        }
+    }
 
     /**
      * Creates a SyntheticResponse from the response of a feed API request.
@@ -34,15 +37,16 @@ class Account internal constructor() {
      * @param minTimestamp  The timestamp at which to begin the fetch of the feed.
      * @return  A {@link SyntheticResponse.ProfileFeed} object.
      */
-    fun getFeed(userKey: String, maxId: String = "", minTimestamp: String = ""): SyntheticResponse.ProfileFeed =
-            AccountAPI.feed(userKey, maxId, minTimestamp, Instagram.session)
-                    .let {
-                        return@let when (it.statusCode) {
-                            200 -> SyntheticResponse.ProfileFeed.Success(it.jsonObject.optJSONArray("items")
-                                    ?: JSONArray())
-                            else -> SyntheticResponse.ProfileFeed.Failure(String.format(Errors.ERROR_FEED_FETCH, it.statusCode, it.text))
-                        }
-                    }
+    fun getFeed(userKey: String, maxId: String = "", minTimestamp: String = ""): SyntheticResponse.ProfileFeed {
+        val (res, error) = wrapAPIException { AccountAPI.feed(userKey, maxId, minTimestamp, Instagram.session) }
+
+        res ?: return SyntheticResponse.ProfileFeed.Failure(error!!)
+
+        return when (res.statusCode) {
+            200 -> SyntheticResponse.ProfileFeed.Success(res.jsonObject.optString("next_max_id", ""),res.jsonObject.optJSONArray("items") ?: JSONArray())
+            else -> SyntheticResponse.ProfileFeed.Failure(InstagramAPIException(res.statusCode, res.text))
+        }
+    }
 
     /**
      * Creates a SyntheticResponse from the response of a follower relationship API request.
@@ -64,17 +68,64 @@ class Account internal constructor() {
     fun getFollowing(userKey: String, maxId: String = ""): SyntheticResponse.Relationships =
             getRelationship(Endpoints.FOLLOWING, userKey, maxId)
 
-    private fun getRelationship(endpoint: String, primaryKey: String, maxId: String): SyntheticResponse.Relationships =
-            AccountAPI.relationship(endpoint, primaryKey, maxId, Instagram.session)
-                    .let {
-                        return@let when (it.statusCode) {
-                            200 -> {
-                                val jsonData = it.jsonObject.getJSONArray("users") ?: JSONArray()
-                                val nextMaxId = it.jsonObject.optString("next_max_id", "")
+    private fun getRelationship(endpoint: String, primaryKey: String, maxId: String): SyntheticResponse.Relationships {
+        val (res, error) = wrapAPIException { AccountAPI.relationships(endpoint, primaryKey, maxId, Instagram.session) }
 
-                                SyntheticResponse.Relationships.Success(nextMaxId, jsonData)
-                            }
-                            else -> SyntheticResponse.Relationships.Failure("Status Code: ${it.statusCode}, Message: ${it.text}.")
-                        }
-                    }
+        res ?: return SyntheticResponse.Relationships.Failure(error!!)
+
+        return when (res.statusCode) {
+            200 -> {
+                val jsonData = res.jsonObject.getJSONArray("users") ?: JSONArray()
+                val nextMaxId = res.jsonObject.optString("next_max_id", "")
+
+                SyntheticResponse.Relationships.Success(nextMaxId, jsonData)
+            }
+            else -> SyntheticResponse.Relationships.Failure(InstagramAPIException(res.statusCode, res.text))
+        }
+    }
+
+    /**
+     * Creates a SyntheticResponse from the response of a user follow API request.
+     *
+     * @return  A {@link SyntheticResponse.RelationshipUpdate} object.
+     */
+    fun followProfile(userKey: String): SyntheticResponse.RelationshipUpdate =
+            updateRelationship(Endpoints.FOLLOW, userKey)
+
+    /**
+     * Creates a SyntheticResponse from the response of a user follow API request.
+     *
+     * @return  A {@link SyntheticResponse.RelationshipUpdate} object.
+     */
+    fun unfollowProfile(userKey: String): SyntheticResponse.RelationshipUpdate =
+            updateRelationship(Endpoints.UNFOLLOW, userKey)
+
+    private fun updateRelationship(endpoint: String, userKey: String): SyntheticResponse.RelationshipUpdate {
+        val (res, error) = wrapAPIException { AccountAPI.updateRelationship(endpoint, userKey, Instagram.session) }
+
+        res ?: return SyntheticResponse.RelationshipUpdate.Failure(error!!)
+
+        return when (res.statusCode) {
+            200 -> SyntheticResponse.RelationshipUpdate.Success(res.jsonObject.optJSONObject("friendship_status") ?: JSONObject())
+            else -> SyntheticResponse.RelationshipUpdate.Failure(InstagramAPIException(res.statusCode, res.text))
+        }
+    }
+
+    /**
+     * Creates a SyntheticResponse from the response of a blocked user list API request.
+     *
+     * @return  A {@link SyntheticResponse.Blocks} object.
+     */
+    fun getBlocked(): SyntheticResponse.Blocks {
+        val (res, error) = wrapAPIException { AccountAPI.blockedAccounts(Instagram.session) }
+
+        res ?: return SyntheticResponse.Blocks.Failure(error!!)
+
+        return when (res.statusCode) {
+            200 -> {
+                SyntheticResponse.Blocks.Success(res.jsonObject.optJSONArray("blocked_list") ?: JSONArray())
+            }
+            else -> SyntheticResponse.Blocks.Failure(InstagramAPIException(res.statusCode, res.text))
+        }
+    }
 }

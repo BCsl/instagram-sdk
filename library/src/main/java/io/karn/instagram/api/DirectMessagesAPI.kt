@@ -5,10 +5,11 @@ import io.karn.instagram.core.Endpoints
 import io.karn.instagram.core.Session
 import khttp.get
 
-internal object StoriesAPI {
 
-    fun getStories(primaryKey: String, session: Session) =
-            get(url = String.format(Endpoints.STORIES, primaryKey),
+internal object DirectMessagesAPI {
+
+    fun getMessages(maxID: String, session: Session) =
+            get(url = String.format(Endpoints.DIRECT_MESSAGES, maxID),
                     headers = Crypto.HEADERS,
                     cookies = session.cookieJar)
 }

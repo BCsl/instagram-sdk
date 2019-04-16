@@ -50,7 +50,7 @@ def testDependencies = [
         instrumentationRunner: 'androidx.test.runner.AndroidJUnitRunner',
         junit: 'junit:junit:4.12',
         kotlin_test: "org.jetbrains.kotlin:kotlin-test:${versions.kotlin}",
-        robolectric: 'org.robolectric:robolectric:4.0'
+        robolectric: 'org.robolectric:robolectric:4.1'
 ]
 
 ext.config = [

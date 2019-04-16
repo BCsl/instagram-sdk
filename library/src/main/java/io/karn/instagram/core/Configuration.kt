@@ -7,21 +7,20 @@ package io.karn.instagram.core
  */
 data class Configuration(
         /**
-         * Flag to use the UserAgent of the device when making API requests. This functionality is currently untested.
+         * Specify the device DPI to ensure that the API serves the correct asset dimensions.
          */
-        internal val deviceUA: Boolean = false,
         internal val deviceDPI: String = Crypto.DPI,
+        /**
+         * Specify the device resolution to ensure that the API serves the correct asset dimensions.
+         */
         internal val deviceResolution: String = Crypto.DISPLAY_RESOLUTION,
         /**
          * Attach a logger to process API calls.
+         *
+         * @param requestMethod The standard HTTP request method -- e.g GET.
+         * @param url           The URL associated with the HTTP request.
+         * @param statusCode    The resulting status code -- e.g 200
+         * @param userAgent     The user-agent provided for the HTTP request.
          */
-        val requestLogger: ((String, String, Int) -> Unit)? = null
-) {
-    init {
-        deviceDPI.takeIf { !it.isBlank() }
-                ?: throw IllegalArgumentException("Must specify a valid DPI value -- e.g '320dpi'.")
-
-        deviceResolution.takeIf { !it.isBlank() }
-                ?: throw IllegalArgumentException("Must specify a valid resolution value -- e.g '1080x1920'.")
-    }
-}
+        var requestLogger: ((requestMethod: String, url: String, statusCode: Int, userAgent: String) -> Unit)? = null
+)

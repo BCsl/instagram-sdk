@@ -1,11 +1,9 @@
 package io.karn.instagram
 
+import android.content.Context
 import io.karn.instagram.core.Configuration
 import io.karn.instagram.core.Session
-import io.karn.instagram.endpoints.Account
-import io.karn.instagram.endpoints.Authentication
-import io.karn.instagram.endpoints.Search
-import io.karn.instagram.endpoints.Stories
+import io.karn.instagram.endpoints.*
 import khttp.KHttpConfig
 
 /**
@@ -15,21 +13,32 @@ import khttp.KHttpConfig
  * Note the the SDK itself is synchronous and allows the developer the flexibility to implement their
  * preferred async pattern.
  */
-class Instagram private constructor(val configuration: Configuration) {
+class Instagram private constructor(private val configuration: Configuration) {
 
     companion object {
         private val NOT_INITIALIZED_ERROR = IllegalStateException("Call `Instagram.init(...)` before calling this method.")
 
-        private var instance: Instagram? = null
+        internal var instance: Instagram? = null
 
         /**
          * Initialize the Instagram SDK with the provided configuration. This function must be executed before other
          * parts of the library are interacted with.
          */
-        fun init(configuration: Configuration = Configuration()) {
+        fun init(context: Context, configure: (Configuration.() -> Unit) = {}) {
             if (instance != null) return
 
-            instance = Instagram(configuration)
+            // Initialize the Configuration.
+            val displayMetrics = context.resources.displayMetrics
+            val config = Configuration(
+                    deviceDPI = "${displayMetrics.densityDpi}dpi",
+                    deviceResolution = "${displayMetrics.widthPixels}x${displayMetrics.heightPixels}"
+            )
+
+            // Apply any changes.
+            config.configure()
+
+            // Build instance.
+            instance = Instagram(config)
         }
 
         fun getInstance(): Instagram {
@@ -37,12 +46,14 @@ class Instagram private constructor(val configuration: Configuration) {
         }
 
         var session: Session
-            get() {
-                return instance?._session ?: throw NOT_INITIALIZED_ERROR
-            }
+            get() = instance?._session ?: throw NOT_INITIALIZED_ERROR
             set(value) {
                 instance?._session = value
             }
+
+        internal val config: Configuration
+            // Return a copy to prevent accidental mutation.
+            get() = instance?.configuration ?: throw NOT_INITIALIZED_ERROR
     }
 
     private var _session: Session = Session()
@@ -50,13 +61,20 @@ class Instagram private constructor(val configuration: Configuration) {
     val account: Account = Account()
     val search: Search = Search()
     val stories: Stories = Stories()
+    val media: Media = Media()
+    val directMessages: DirectMessages = DirectMessages()
 
     init {
         // Log network calls if needed.
         // TODO: Investigate whether or not we need buffered writers instead.
         configuration.requestLogger?.let { logger ->
             KHttpConfig.attachInterceptor {
-                logger.invoke(it.request.method, it.request.url, it.statusCode)
+                logger.invoke(
+                        it.request.method,
+                        it.request.url,
+                        it.statusCode,
+                        it.request.headers["User-Agent"] ?: ""
+                )
             }
         }
     }

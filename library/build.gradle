@@ -43,14 +43,20 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    android.testOptions.unitTests.all {
+        // We only want to execute tests that are part of a suite. These test suites should be suffixed with 'TestSuite'
+        it.include "**/*TestSuite*"
+        // Additionally, we want to fail here and prevent the continuation of the build process.
+        ignoreFailures = false
+    }
+
 }
 
-allprojects {
-    repositories {
-        google()
-        jcenter()
-        maven { url 'https://jitpack.io' }
-    }
+repositories {
+    google()
+    jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -70,9 +76,12 @@ jacoco {
 
 tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
-    //travis has some strict RAM restrictions, can't afford to exceed this
+    jacoco.excludes = ['jdk.internal.*']
+    // Travis has some strict RAM restrictions, can't afford to exceed this.
     maxHeapSize = "1024m"
     jvmArgs "-Xmx1024m"
+    // We rely on a this to ensure that new instances of Kotlin's objects are not created between forks.
+    maxParallelForks = 1
 }
 
 /**
