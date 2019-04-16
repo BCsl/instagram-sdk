@@ -7,6 +7,7 @@ import io.karn.instagram.common.wrapAPIException
 import io.karn.instagram.core.CookieUtils
 import io.karn.instagram.core.Crypto
 import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.exceptions.InstagramAPIException
 import khttp.responses.Response
 import org.json.JSONObject
 
@@ -69,18 +70,18 @@ class Authentication internal constructor() {
 
         val (res, error) = wrapAPIException { AuthenticationAPI.twoFactor(data) }
 
-        res ?: return SyntheticResponse.TwoFactorResult.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.TwoFactorResult.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> SyntheticResponse.TwoFactorResult.Success(buildSuccess(res))
-            else -> SyntheticResponse.TwoFactorResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+            else -> SyntheticResponse.TwoFactorResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
         }
     }
 
     fun prepareAuthChallenge(path: String): SyntheticResponse.ChallengeResult {
         val (res, error) = wrapAPIException { AuthenticationAPI.prepareAuthChallenge(path, Instagram.session) }
 
-        res ?: return SyntheticResponse.ChallengeResult.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.ChallengeResult.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> {
@@ -89,17 +90,17 @@ class Authentication internal constructor() {
                 if (res.jsonObject.optString("step_name") == "select_verify_method") {
                     SyntheticResponse.ChallengeResult.Success(res.jsonObject)
                 } else {
-                    SyntheticResponse.ChallengeResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                    SyntheticResponse.ChallengeResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
                 }
             }
-            else -> SyntheticResponse.ChallengeResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+            else -> SyntheticResponse.ChallengeResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
         }
     }
 
     fun selectAuthChallengeMethod(path: String, method: String): SyntheticResponse.AuthMethodSelectionResult {
         val (res, error) = wrapAPIException { AuthenticationAPI.selectAuthChallengeMethod(path, method, Instagram.session) }
 
-        res ?: return SyntheticResponse.AuthMethodSelectionResult.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.AuthMethodSelectionResult.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> {
@@ -110,37 +111,37 @@ class Authentication internal constructor() {
                             ?: JSONObject())
                     "verify_email" -> SyntheticResponse.AuthMethodSelectionResult.EmailSelectionSuccess(res.jsonObject.optJSONObject("step_data")
                             ?: JSONObject())
-                    else -> SyntheticResponse.AuthMethodSelectionResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                    else -> SyntheticResponse.AuthMethodSelectionResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
                 }
             }
-            else -> SyntheticResponse.AuthMethodSelectionResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+            else -> SyntheticResponse.AuthMethodSelectionResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
         }
     }
 
     fun submitChallengeCode(path: String, code: String): SyntheticResponse.ChallengeCodeSubmitResult {
         val (res, error) = wrapAPIException { AuthenticationAPI.submitAuthChallenge(path, code, Instagram.session) }
 
-        res ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> {
                 val token = AuthenticationAPI.parseCSRFToken(res).takeIf { !it.isNullOrBlank() || it != "null" }
-                        ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                        ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
 
                 SyntheticResponse.ChallengeCodeSubmitResult.Success(token)
             }
-            else -> SyntheticResponse.ChallengeCodeSubmitResult.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+            else -> SyntheticResponse.ChallengeCodeSubmitResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
         }
     }
 
     fun logoutUser(): SyntheticResponse.Logout {
         val (res, error) = wrapAPIException { AuthenticationAPI.logout() }
 
-        res ?: return SyntheticResponse.Logout.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.Logout.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> SyntheticResponse.Logout.Success(res.statusCode)
-            else -> SyntheticResponse.Logout.Failure(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+            else -> SyntheticResponse.Logout.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
         }
     }
 
@@ -153,7 +154,7 @@ class Authentication internal constructor() {
 
         val (res, error) = wrapAPIException { AuthenticationAPI.login(data) }
 
-        res ?: return SyntheticResponse.Auth.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.Auth.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> SyntheticResponse.Auth.Success(buildSuccess(res))
@@ -174,7 +175,7 @@ class Authentication internal constructor() {
                     else -> SyntheticResponse.Auth.InvalidCredentials(res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
                 }
             }
-            else -> SyntheticResponse.Auth.Failure(res.statusCode, res.text)
+            else -> SyntheticResponse.Auth.Failure(InstagramAPIException(res.statusCode, res.text))
         }
     }
 

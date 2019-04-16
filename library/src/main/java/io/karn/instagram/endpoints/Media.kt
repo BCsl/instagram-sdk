@@ -4,6 +4,7 @@ import io.karn.instagram.Instagram
 import io.karn.instagram.api.MediaAPI
 import io.karn.instagram.common.wrapAPIException
 import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.exceptions.InstagramAPIException
 import org.json.JSONArray
 
 class Media internal constructor() {
@@ -16,12 +17,12 @@ class Media internal constructor() {
     fun getLikes(mediaKey: String): SyntheticResponse.MediaLikes {
         val (res, error) = wrapAPIException { MediaAPI.getLikes(mediaKey, Instagram.session) }
 
-        res ?: return SyntheticResponse.MediaLikes.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.MediaLikes.Failure(error!!)
 
         // Handle error messages.
         return when (res.statusCode) {
             200 -> SyntheticResponse.MediaLikes.Success(res.jsonObject.optJSONArray("users") ?: JSONArray())
-            else -> SyntheticResponse.MediaLikes.Failure(res.statusCode, res.text)
+            else -> SyntheticResponse.MediaLikes.Failure(InstagramAPIException(res.statusCode, res.text))
         }
     }
 
@@ -34,12 +35,12 @@ class Media internal constructor() {
     fun getComments(mediaKey: String): SyntheticResponse.MediaComments {
         val (res, error) = wrapAPIException { MediaAPI.getComments(mediaKey, Instagram.session) }
 
-        res ?: return SyntheticResponse.MediaComments.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.MediaComments.Failure(error!!)
 
         // Handle error messages.
         return when (res.statusCode) {
             200 -> SyntheticResponse.MediaComments.Success(res.jsonObject.optJSONArray("comments") ?: JSONArray())
-            else -> SyntheticResponse.MediaComments.Failure(res.statusCode, res.text)
+            else -> SyntheticResponse.MediaComments.Failure(InstagramAPIException(res.statusCode, res.text))
         }
     }
 }

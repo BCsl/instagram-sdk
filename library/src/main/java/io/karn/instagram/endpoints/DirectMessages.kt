@@ -5,6 +5,7 @@ import io.karn.instagram.api.DirectMessagesAPI
 import io.karn.instagram.common.Errors
 import io.karn.instagram.common.wrapAPIException
 import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.exceptions.InstagramAPIException
 import org.json.JSONArray
 
 class DirectMessages internal constructor() {
@@ -18,7 +19,7 @@ class DirectMessages internal constructor() {
     fun get(maxId: String = ""): SyntheticResponse.DirectMessages {
         val (res, error) = wrapAPIException { DirectMessagesAPI.getMessages(maxId, Instagram.session) }
 
-        res ?: return SyntheticResponse.DirectMessages.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.DirectMessages.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> {
@@ -26,12 +27,12 @@ class DirectMessages internal constructor() {
                 val unseenCount = res.jsonObject.optJSONObject("inbox")?.optInt("unseen_count", 0) ?: 0
 
                 if (threads.length() == 0) {
-                    SyntheticResponse.DirectMessages.Failure(res.statusCode, Errors.ERROR_SEARCH_NO_RESULTS)
+                    SyntheticResponse.DirectMessages.Failure(InstagramAPIException(res.statusCode, Errors.ERROR_SEARCH_NO_RESULTS))
                 } else {
                     SyntheticResponse.DirectMessages.Success(unseenCount, threads)
                 }
             }
-            else -> SyntheticResponse.DirectMessages.Failure(res.statusCode, res.text)
+            else -> SyntheticResponse.DirectMessages.Failure(InstagramAPIException(res.statusCode, res.text))
         }
     }
 }

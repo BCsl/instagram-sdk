@@ -4,6 +4,7 @@ import io.karn.instagram.Instagram
 import io.karn.instagram.api.StoriesAPI
 import io.karn.instagram.common.wrapAPIException
 import io.karn.instagram.core.SyntheticResponse
+import io.karn.instagram.exceptions.InstagramAPIException
 import org.json.JSONArray
 
 class Stories internal constructor() {
@@ -17,7 +18,7 @@ class Stories internal constructor() {
     fun getStories(userKey: String): SyntheticResponse.StoryReel {
         val (res, error) = wrapAPIException { StoriesAPI.getStories(userKey, Instagram.session) }
 
-        res ?: return SyntheticResponse.StoryReel.Failure(error!!.statusCode, error.statusMessage)
+        res ?: return SyntheticResponse.StoryReel.Failure(error!!)
 
         return when (res.statusCode) {
             200 -> {
@@ -27,7 +28,7 @@ class Stories internal constructor() {
 
                 SyntheticResponse.StoryReel.Success(reel)
             }
-            else -> SyntheticResponse.StoryReel.Failure(res.statusCode, res.text)
+            else -> SyntheticResponse.StoryReel.Failure(InstagramAPIException(res.statusCode, res.text))
         }
     }
 }
