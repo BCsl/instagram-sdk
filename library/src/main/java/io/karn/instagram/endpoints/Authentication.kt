@@ -172,7 +172,10 @@ class Authentication internal constructor() {
                         // User needs to pass challenge
                         SyntheticResponse.Auth.ChallengeRequired(res.jsonObject.getJSONObject("challenge"))
                     }
-                    else -> SyntheticResponse.Auth.InvalidCredentials(res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                    res.jsonObject.optBoolean("invalid_credentials") -> {
+                        SyntheticResponse.Auth.InvalidCredentials(res.jsonObject.optString("message", Errors.ERROR_UNKNOWN))
+                    }
+                    else -> SyntheticResponse.Auth.Failure(InstagramAPIException(res.statusCode, res.text))
                 }
             }
             else -> SyntheticResponse.Auth.Failure(InstagramAPIException(res.statusCode, res.text))
