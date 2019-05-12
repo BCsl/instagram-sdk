@@ -87,10 +87,9 @@ class Authentication internal constructor() {
             200 -> {
                 Instagram.session.cookieJar = res.cookies
 
-                if (res.jsonObject.optString("step_name") == "select_verify_method") {
-                    SyntheticResponse.ChallengeResult.Success(res.jsonObject)
-                } else {
-                    SyntheticResponse.ChallengeResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
+                when (res.jsonObject.optString("step_name")) {
+                    "select_verify_method" -> SyntheticResponse.ChallengeResult.Success(res.jsonObject)
+                    else -> SyntheticResponse.ChallengeResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
                 }
             }
             else -> SyntheticResponse.ChallengeResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
@@ -124,12 +123,7 @@ class Authentication internal constructor() {
         res ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(error!!)
 
         return when (res.statusCode) {
-            200 -> {
-                val token = AuthenticationAPI.parseCSRFToken(res).takeIf { !it.isNullOrBlank() || it != "null" }
-                        ?: return SyntheticResponse.ChallengeCodeSubmitResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
-
-                SyntheticResponse.ChallengeCodeSubmitResult.Success(token)
-            }
+            200 -> SyntheticResponse.ChallengeCodeSubmitResult.Success(buildSuccess(res))
             else -> SyntheticResponse.ChallengeCodeSubmitResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
         }
     }
