@@ -89,6 +89,7 @@ class Authentication internal constructor() {
 
                 when (res.jsonObject.optString("step_name")) {
                     "select_verify_method" -> SyntheticResponse.ChallengeResult.Success(res.jsonObject)
+                    "delta_login_review" -> SyntheticResponse.ChallengeResult.Success(res.jsonObject)
                     else -> SyntheticResponse.ChallengeResult.Failure(InstagramAPIException(res.statusCode, res.jsonObject.optString("message", Errors.ERROR_UNKNOWN)))
                 }
             }

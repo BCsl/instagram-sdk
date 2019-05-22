@@ -10,14 +10,14 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 internal object Crypto {
-    private const val SIG_KEY = "673581b0ddb792bf47da5f9ca816b613d7996f342723aa06993a3f0552311c7d"
+    private const val SIG_KEY = "937463b5272b5d60e9d20f0f8d7d192193dd95095a3ad43725d494300a5ea5fc"
     const val SIG_VERSION = "4"
 
     internal const val DPI: String = "640dpi"
     internal const val DISPLAY_RESOLUTION: String = "1440x2560"
 
-    private const val APP_VERSION = "42.0.0.19.95"
-    private const val VERSION_CODE: String = "104766893"
+    private const val APP_VERSION = "85.0.0.21.100"
+    private const val VERSION_CODE: String = "146536611"
 
     val HEADERS: HashMap<String, String> = hashMapOf(
             "Accept-Encoding" to "gzip, deflate",
